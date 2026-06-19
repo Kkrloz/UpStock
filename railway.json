@@ -1,0 +1,9 @@
+{
+  "build": {
+    "builder": "maven",
+    "buildCommand": "mvn clean package -DskipTests"
+  },
+  "deploy": {
+    "startCommand": "java -jar target/upstock-0.0.1-SNAPSHOT.jar"
+  }
+}
