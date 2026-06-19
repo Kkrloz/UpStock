@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UpStock | Console de Testes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <header class="app-header">
+        <div class="header-logo">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <div class="logo-text">
+                <h1>UpStock</h1>
+                <span>Console de Teste da API</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <a href="swagger-ui/index.html" target="_blank" class="btn btn-secondary btn-icon-text">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/>
+                </svg>
+                Documentação Swagger
+            </a>
+            <div id="user-badge" class="user-badge guest">
+                <div class="badge-dot"></div>
+                <span id="user-badge-text">Visitante (Não Autenticado)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-layout">
+        <!-- Coluna Esquerda: Controle de Acesso e Formulário -->
+        <section class="layout-sidebar">
+            <!-- Card de Autenticação -->
+            <div class="card card-glow" id="auth-card">
+                <div class="card-header">
+                    <h2 class="card-title">Autenticação</h2>
+                    <p class="card-subtitle">Efetue login ou registre-se para testar endpoints protegidos</p>
+                </div>
+                
+                <!-- Abas de Auth -->
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="register">Cadastrar</button>
+                </div>
+
+                <!-- Formulário de Login -->
+                <form id="login-form" class="auth-form active">
+                    <div class="form-group">
+                        <label for="login-email">E-mail</label>
+                        <input type="email" id="login-email" required placeholder="exemplo@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Senha</label>
+                        <input type="password" id="login-password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Entrar
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Formulário de Registro -->
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="reg-name">Nome Completo</label>
+                        <input type="text" id="reg-name" required placeholder="Seu nome">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">E-mail</label>
+                        <input type="email" id="reg-email" required placeholder="exemplo@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Senha</label>
+                        <input type="password" id="reg-password" required placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        Criar Conta
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Estado Logado -->
+                <div id="auth-logged-state" class="auth-logged-container hidden">
+                    <div class="user-profile">
+                        <div class="user-avatar" id="user-avatar-initials">U</div>
+                        <div class="user-info">
+                            <h3 id="logged-user-name">Carlos Eduardo</h3>
+                            <span id="logged-user-email">carlos@email.com</span>
+                        </div>
+                    </div>
+                    
+                    <div class="token-display">
+                        <label>JWT Token Ativo:</label>
+                        <div class="token-box">
+                            <code id="jwt-token-preview">Nenhum token ativo...</code>
+                            <button id="btn-copy-token" title="Copiar Token">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button id="btn-logout" class="btn btn-danger btn-block btn-icon-text">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                        </svg>
+                        Encerrar Sessão
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card Formulário de Produto -->
+            <div class="card" id="product-form-card">
+                <div class="card-header">
+                    <div class="card-header-badge" id="product-form-badge">Criar</div>
+                    <h2 class="card-title" id="product-form-title">Gerenciar Produto</h2>
+                    <p class="card-subtitle" id="product-form-subtitle">Cadastre um novo item no banco de dados</p>
+                </div>
+
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    <div class="form-group">
+                        <label for="product-name">Nome do Produto *</label>
+                        <input type="text" id="product-name" required placeholder="Ex: Teclado Mecânico RGB">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-price">Preço (R$) *</label>
+                        <input type="number" id="product-price" step="0.01" min="0" required placeholder="Ex: 349.90">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-quantity">Quantidade *</label>
+                        <input type="number" id="product-quantity" min="0" step="1" required placeholder="Ex: 10" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-description">Descrição</label>
+                        <textarea id="product-description" rows="3" placeholder="Insira detalhes sobre o produto..."></textarea>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <button type="button" id="btn-cancel-edit" class="btn btn-secondary hidden">Cancelar</button>
+                        <button type="submit" id="btn-submit-product" class="btn btn-success btn-grow">
+                            Salvar Produto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Coluna Direita: Tabela de Produtos e Console de Logs -->
+        <section class="layout-main">
+            <!-- Grid de Produtos -->
+            <div class="card list-card">
+                <div class="card-header list-header">
+                    <div>
+                        <h2 class="card-title">Inventário de Produtos</h2>
+                        <p class="card-subtitle">Listagem de itens do banco de dados (Necessário Token JWT)</p>
+                    </div>
+                    <div class="list-actions">
+                        <button id="btn-refresh-products" class="btn btn-secondary btn-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabela de Produtos -->
+                <div class="table-container">
+                    <table class="data-table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th width="80">ID</th>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th width="100">Qtd.</th>
+                                <th width="120">Preço</th>
+                                <th width="120">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <!-- Inserido dinamicamente via JS -->
+                            <tr class="table-state-row">
+                                <td colspan="6">
+                                    <div class="table-loading-state">
+                                        <div class="spinner"></div>
+                                        <span>Aguardando autenticação...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Console de Logs da API -->
+            <div class="card console-card">
+                <div class="card-header console-header">
+                    <div class="console-title-group">
+                        <div class="console-pulse"></div>
+                        <h2 class="card-title">Console de Testes da API (HTTP Logs)</h2>
+                    </div>
+                    <button id="btn-clear-console" class="btn btn-text btn-icon-text">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/>
+                        </svg>
+                        Limpar Terminal
+                    </button>
+                </div>
+                
+                <div class="console-terminal" id="console-terminal">
+                    <!-- Logs da API inseridos aqui -->
+                    <div class="console-log-welcome">
+                        <span class="c-accent">></span> Console inicializado. Todas as requisições HTTP feitas à API serão registradas abaixo.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>UpStock Dashboard &copy; 2026. Desenvolvido para facilitar testes do sistema.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
