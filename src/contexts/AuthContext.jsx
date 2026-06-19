@@ -48,6 +48,20 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const register = async (name, email, password) => {
+    setLoading(true);
+    try {
+      const newUser = await authService.register({ name, email, password });
+      setUser(newUser);
+      return newUser;
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /**
    * Cria um novo usuário. Exclusivo para administradores.
    */
@@ -78,6 +92,7 @@ export function AuthProvider({ children }) {
     loading,
     isAdmin,
     login,
+    register,
     logout,
     createUser,
     deleteUser,

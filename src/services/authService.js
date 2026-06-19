@@ -67,4 +67,17 @@ export const authService = {
   async deleteUser(userId) {
     await api.delete(`/users/${userId}`);
   },
+
+  async register({ name, email, password }) {
+    const response = await api.post('/auth/register', { name, email, password });
+    const { token } = response.data;
+
+    localStorage.setItem(TOKEN_KEY, token);
+
+    const meResponse = await api.get('/users/me');
+    const user = normalizeUser(meResponse.data);
+
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    return user;
+  },
 };

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
@@ -108,6 +108,11 @@ function Login() {
             )}
           </button>
         </form>
+
+        <div className="login-register-link">
+          Não tem uma conta?{' '}
+          <Link to="/cadastro" className="login-register-link-text">Cadastre-se</Link>
+        </div>
       </div>
     </div>
   );

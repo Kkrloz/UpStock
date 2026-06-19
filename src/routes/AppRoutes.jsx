@@ -13,6 +13,7 @@ import Notificacoes from '../pages/notificacoes/Notificacoes.jsx';
 import Configuracoes from '../pages/configuracoes/Configuracoes.jsx';
 import Sair from '../pages/sair/Sair.jsx';
 import Login from '../pages/login/Login.jsx';
+import Cadastro from '../pages/cadastro/Cadastro.jsx';
 import Usuarios from '../pages/usuarios/Usuarios.jsx';
 
 function AppRoutes() {
@@ -21,6 +22,7 @@ function AppRoutes() {
       {/* Rotas públicas (apenas para visitantes não logados) */}
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Cadastro />} />
       </Route>
 
       {/* Rota neutra (desloga o usuário e mostra tela de confirmação de saída) */}
