@@ -60,7 +60,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("https://upstock.vercel.app");
         config.addAllowedOrigin("https://up-stock-kappa.vercel.app");
         config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedOrigin("http://localhost:8080");
