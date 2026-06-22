@@ -19,7 +19,7 @@ function Produtos() {
 
   const [search, setSearch] = useState('');
 
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.role === 'admin';
 
   const loadProducts = useCallback(() => {
     const abort = new AbortController();
