@@ -53,12 +53,9 @@ export const authService = {
     return response.data.map(normalizeUser);
   },
 
-  async createUser({ name, email, password, cargo, role = 'user' }) {
+  async createUser({ name, email, password, cargo, role = 'user', storeName }) {
     const response = await api.post('/users', {
-      name,
-      email,
-      password,
-      cargo,
+      name, email, password, cargo, storeName,
       role: role.toUpperCase(),
     });
     return normalizeUser(response.data);

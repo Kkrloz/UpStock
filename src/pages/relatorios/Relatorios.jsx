@@ -8,7 +8,6 @@ function Relatorios() {
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-extrabold tracking-tight text-(--text-primary-color)">Relatórios</h1>
@@ -23,7 +22,6 @@ function Relatorios() {
         </button>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {reportCards.map((card, i) => {
           const Icon = card.icon;

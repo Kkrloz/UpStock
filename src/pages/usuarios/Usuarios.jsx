@@ -13,7 +13,6 @@ function Usuarios() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [showForm, setShowForm] = useState(false);
 
-  // Form state
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', cargo: '', role: 'user', storeName: ''
   });
@@ -22,7 +21,6 @@ function Usuarios() {
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState('');
 
-  // Delete state
   const [deletingId, setDeletingId] = useState(null);
   const [deleteError, setDeleteError] = useState('');
 
@@ -92,7 +90,6 @@ function Usuarios() {
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-      {/* Cabeçalho da página */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-(--text-primary-color) tracking-tight flex items-center gap-2">
@@ -113,7 +110,6 @@ function Usuarios() {
         </button>
       </div>
 
-      {/* Cards de resumo */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-(--bg-card-color) border border-(--border-color) rounded-2xl p-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
@@ -144,7 +140,6 @@ function Usuarios() {
         </div>
       </div>
 
-      {/* Erro de delete */}
       {deleteError && (
         <div className="flex items-center gap-2.5 p-3.5 bg-rose-500/10 border border-rose-500/20 text-(--red-color4) text-sm rounded-xl">
           <AlertCircle size={16} className="shrink-0" />
@@ -152,7 +147,6 @@ function Usuarios() {
         </div>
       )}
 
-      {/* Formulário de novo usuário */}
       {showForm && (
         <div className="bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl">
           <div className="flex items-center justify-between mb-5">
@@ -182,7 +176,6 @@ function Usuarios() {
           )}
 
           <form onSubmit={handleCreateUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Nome */}
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Nome Completo *</label>
               <div className="relative">
@@ -201,7 +194,6 @@ function Usuarios() {
                </div>
              </div>
 
-             {/* Email */}
              <div className="flex flex-col gap-1">
                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">E-mail *</label>
                <div className="relative">
@@ -220,7 +212,6 @@ function Usuarios() {
               </div>
             </div>
 
-            {/* Senha */}
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Senha *</label>
               <div className="relative">
@@ -247,7 +238,6 @@ function Usuarios() {
               </div>
             </div>
 
-            {/* Cargo */}
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Cargo</label>
               <div className="relative">
@@ -265,29 +255,27 @@ function Usuarios() {
                </div>
              </div>
 
-              {/* Nome do Estabelecimento */}
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Estabelecimento</label>
-                <div className="relative">
-                  <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
-                  <input
-                    id="form-user-store"
-                    name="storeName"
-                    type="text"
-                    placeholder="Nome da loja/estabelecimento"
-                    value={formData.storeName}
-                    onChange={handleFormChange}
-                    disabled={formLoading}
-                    className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
-                  />
-                </div>
-              </div>
+             <div className="flex flex-col gap-1">
+               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Estabelecimento</label>
+               <div className="relative">
+                 <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+                 <input
+                   id="form-user-store"
+                   name="storeName"
+                   type="text"
+                   placeholder="Nome da loja/estabelecimento"
+                   value={formData.storeName}
+                   onChange={handleFormChange}
+                   disabled={formLoading}
+                   className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
+                 />
+               </div>
+             </div>
 
-              {/* Perfil de acesso */}
-              <div className="flex flex-col gap-1 sm:col-span-2">
-               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Perfil de Acesso</label>
-               <div className="flex gap-3">
-                 <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'user' ? 'border-blue-500/50 bg-blue-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
+             <div className="flex flex-col gap-1 sm:col-span-2">
+              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Perfil de Acesso</label>
+              <div className="flex gap-3">
+                <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'user' ? 'border-blue-500/50 bg-blue-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
                   <input
                     type="radio"
                     name="role"
@@ -298,7 +286,7 @@ function Usuarios() {
                   />
                   <UserCircle size={18} className={formData.role === 'user' ? 'text-(--blue-color3)' : 'text-(--text-secondary-color)'} />
                   <div>
-                     <p className="text-sm font-bold text-(--text-primary-color)">Loja</p>
+                    <p className="text-sm font-bold text-(--text-primary-color)">Loja</p>
                     <p className="text-xs text-(--text-secondary-color)">Acesso próprio — vê apenas seus produtos</p>
                   </div>
                 </label>
@@ -313,14 +301,13 @@ function Usuarios() {
                   />
                   <Shield size={18} className={formData.role === 'admin' ? 'text-(--yellow-color2)' : 'text-(--text-secondary-color)'} />
                   <div>
-                     <p className="text-sm font-bold text-(--text-primary-color)">Administrador</p>
+                    <p className="text-sm font-bold text-(--text-primary-color)">Administrador</p>
                     <p className="text-xs text-(--text-secondary-color)">Acesso total — gerencia todas as lojas</p>
                   </div>
                 </label>
               </div>
             </div>
 
-            {/* Botões */}
             <div className="sm:col-span-2 flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
               <button
                 type="button"
@@ -347,7 +334,6 @@ function Usuarios() {
         </div>
       )}
 
-      {/* Lista de usuários */}
       <div className="bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-(--border-color)">
           <h2 className="text-sm font-bold text-(--text-primary-color)">Contas Cadastradas</h2>
@@ -367,12 +353,10 @@ function Usuarios() {
           <div className="divide-y divide-(--border-color)">
             {users.map((u) => (
               <div key={u.id} className="flex items-center gap-4 px-6 py-4 hover:bg-(--bg-card-hover-color) transition-colors">
-                {/* Avatar */}
                 <div className="w-10 h-10 rounded-full bg-(--avatar-bg) flex items-center justify-center shrink-0 font-bold text-(--text-on-accent) text-sm select-none">
                   {u.name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()}
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-(--text-primary-color) truncate">{u.name}</p>
@@ -385,7 +369,6 @@ function Usuarios() {
                   {u.cargo && <p className="text-xs text-(--text-tercery-color) truncate">{u.cargo}</p>}
                 </div>
 
-                {/* Role badge */}
                 <div className="shrink-0">
                   {u.role === 'admin' ? (
                     <span className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-yellow-500/10 text-(--yellow-color2) border border-yellow-500/20 font-semibold">
@@ -400,10 +383,8 @@ function Usuarios() {
                   )}
                 </div>
 
-                {/* Data */}
                 <p className="text-xs text-(--text-secondary-color) shrink-0 hidden md:block">{u.createdAt}</p>
 
-                {/* Botão remover */}
                 <button
                   onClick={() => handleDeleteUser(u.id, u.name)}
                   disabled={deletingId === u.id || u.id === currentUser?.id}

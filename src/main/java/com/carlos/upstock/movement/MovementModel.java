@@ -48,4 +48,5 @@ public class MovementModel {
             timestamp = LocalDateTime.now();
         }
     }
+
 }

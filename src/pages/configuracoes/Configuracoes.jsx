@@ -28,8 +28,6 @@ function passwordStrength(pwd) {
   return { score, ...map[score] };
 }
 
-/* ─── sub-components ──────────────────────────────────────────── */
-
 function FeedbackBanner({ type, message, onClose }) {
   if (!message) return null;
   const isOk = type === 'success';
@@ -51,7 +49,7 @@ function FieldLabel({ children, hint }) {
   );
 }
 
-function CfgInput({ id, type = 'text', value, onChange, disabled, placeholder, readOnly }) {
+function CfgInput({ id, type = 'text', value, onChange, disabled, placeholder, readOnly, style }) {
   return (
     <input
       id={id}
@@ -61,6 +59,7 @@ function CfgInput({ id, type = 'text', value, onChange, disabled, placeholder, r
       disabled={disabled}
       placeholder={placeholder}
       readOnly={readOnly}
+      style={style}
       className={`cfg-input${disabled || readOnly ? ' cfg-input-disabled' : ''}`}
     />
   );
@@ -121,16 +120,13 @@ function SectionCard({ title, description, children }) {
   );
 }
 
-/* ─── ABAS ────────────────────────────────────────────────────── */
-
-/* ABA 1 — PERFIL */
 function TabPerfil({ user }) {
   const [name, setName]         = useState(user?.name || '');
   const [email, setEmail]       = useState(user?.email || '');
   const [storeName, setStoreName] = useState(user?.storeName || '');
   const [phone, setPhone]       = useState('');
   const [bio, setBio]           = useState('');
-  const [avatar, setAvatar]     = useState(null); // base64 ou null
+  const [avatar, setAvatar]     = useState(null);
   const [preview, setPreview]   = useState(null);
   const [dragging, setDragging] = useState(false);
   const [saving, setSaving]     = useState(false);
@@ -170,7 +166,6 @@ function TabPerfil({ user }) {
     <form onSubmit={handleSave} className="cfg-tab-body">
       <FeedbackBanner type={feedback?.type} message={feedback?.msg} onClose={() => setFeedback(null)} />
 
-      {/* Foto de perfil */}
       <SectionCard title="Foto de Perfil" description="Formatos aceitos: JPG, PNG, WEBP. Tamanho máximo: 2 MB.">
         <div className="cfg-avatar-row">
           <div className="cfg-avatar-wrap">
@@ -215,7 +210,6 @@ function TabPerfil({ user }) {
         </div>
       </SectionCard>
 
-      {/* Dados pessoais */}
       <SectionCard title="Dados Pessoais">
         <div className="cfg-grid-2">
           <div className="cfg-field">
@@ -260,7 +254,6 @@ function TabPerfil({ user }) {
   );
 }
 
-/* ABA 2 — SEGURANÇA */
 function TabSeguranca({ user }) {
   const [curr, setCurr]     = useState('');
   const [next, setNext]     = useState('');
@@ -302,7 +295,6 @@ function TabSeguranca({ user }) {
     <div className="cfg-tab-body">
       <FeedbackBanner type={feedback?.type} message={feedback?.msg} onClose={() => setFb(null)} />
 
-      {/* Troca de Senha */}
       <SectionCard title="Alterar Senha" description="Use uma senha forte com letras, números e símbolos.">
         <form onSubmit={handlePassword} className="cfg-pw-form">
           <div className="cfg-field">
@@ -342,13 +334,10 @@ function TabSeguranca({ user }) {
           </div>
         </form>
       </SectionCard>
-
-
     </div>
   );
 }
 
-/* ABA 3 — PREFERÊNCIAS */
 function TabPreferencias() {
   const { theme, setTheme } = useTheme();
   const [language,   setLang]     = useState('pt-BR');
@@ -372,7 +361,6 @@ function TabPreferencias() {
     <form onSubmit={handleSave} className="cfg-tab-body">
       <FeedbackBanner type={feedback?.type} message={feedback?.msg} onClose={() => setFb(null)} />
 
-      {/* Aparência */}
       <SectionCard title="Aparência" description="Escolha o tema visual do sistema.">
         <div className="cfg-theme-opts">
           {[
@@ -394,7 +382,6 @@ function TabPreferencias() {
         </div>
       </SectionCard>
 
-      {/* Idioma e Fuso */}
       <SectionCard title="Idioma & Fuso Horário">
         <div className="cfg-grid-2">
           <div className="cfg-field">
@@ -424,7 +411,6 @@ function TabPreferencias() {
         </div>
       </SectionCard>
 
-      {/* Notificações */}
       <SectionCard title="Notificações" description="Controle como e quando você é notificado.">
         <div className="cfg-toggle-list">
           {[
@@ -456,8 +442,6 @@ function TabPreferencias() {
   );
 }
 
-/* ─── COMPONENTE PRINCIPAL ────────────────────────────────────── */
-
 const TABS = [
   { id: 'perfil',       label: 'Perfil',               Icon: User    },
   { id: 'seguranca',    label: 'Segurança & Acesso',    Icon: Shield  },
@@ -470,7 +454,6 @@ function Configuracoes() {
 
   return (
     <div className="cfg-page">
-      {/* Cabeçalho da página */}
       <div className="cfg-page-header">
         <div>
           <h1 className="cfg-page-title">Configurações</h1>
@@ -479,9 +462,7 @@ function Configuracoes() {
       </div>
 
       <div className="cfg-layout">
-        {/* Navegação lateral */}
         <nav className="cfg-nav" aria-label="Seções de configurações">
-          {/* Mini perfil no topo da nav */}
           <div className="cfg-nav-profile">
             <div className="cfg-nav-avatar" style={{ backgroundColor: getAvatarColor(user?.name || '') }}>
               <span>{getInitials(user?.name || '')}</span>
@@ -508,7 +489,6 @@ function Configuracoes() {
           ))}
         </nav>
 
-        {/* Conteúdo das abas */}
         <div className="cfg-content">
           {activeTab === 'perfil'       && <TabPerfil       user={user} />}
           {activeTab === 'seguranca'    && <TabSeguranca    user={user} />}

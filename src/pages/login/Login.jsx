@@ -34,8 +34,6 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-
-        {/* Logo */}
         <div className="login-logo-row">
           <img src="/UpStock-branco.svg" alt="UpStock" className="login-logo-img" />
           <span className="login-logo-text">UpStock</span>
@@ -46,7 +44,6 @@ function Login() {
           <p className="login-subtitle">Sistema de gestão de estoque</p>
         </div>
 
-        {/* Erro */}
         {error && (
           <div className="login-error">
             <AlertCircle size={15} />
@@ -57,55 +54,21 @@ function Login() {
         <form onSubmit={handleSubmit} className="login-form">
           <div className="login-field">
             <label htmlFor="login-email" className="login-label">E-mail</label>
-            <input
-              id="login-email"
-              type="email"
-              placeholder="seu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
-              className="login-input"
-              autoComplete="email"
-              required
-            />
+            <input id="login-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading} className="login-input" autoComplete="email" required />
           </div>
 
           <div className="login-field">
             <label htmlFor="login-password" className="login-label">Senha</label>
             <div className="login-input-wrapper">
-              <input
-                id="login-password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                className="login-input"
-                autoComplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                tabIndex="-1"
-                onClick={() => setShowPassword(!showPassword)}
-                className="login-eye-btn"
-              >
+              <input id="login-password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoading} className="login-input" autoComplete="current-password" required />
+              <button type="button" tabIndex="-1" onClick={() => setShowPassword(!showPassword)} className="login-eye-btn">
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
           </div>
 
-          <button
-            id="login-submit-btn"
-            type="submit"
-            disabled={isLoading}
-            className="login-submit-btn"
-          >
-            {isLoading ? (
-              <div className="login-spinner" />
-            ) : (
-              'Entrar'
-            )}
+          <button id="login-submit-btn" type="submit" disabled={isLoading} className="login-submit-btn">
+            {isLoading ? <div className="login-spinner" /> : 'Entrar'}
           </button>
         </form>
 

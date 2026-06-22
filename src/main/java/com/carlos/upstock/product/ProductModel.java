@@ -1,6 +1,7 @@
 package com.carlos.upstock.product;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "products")
 public class ProductModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,6 +35,8 @@ public class ProductModel {
     private Long userId;
 
     @Transient
+    @JsonProperty
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String storeName;
+
 }

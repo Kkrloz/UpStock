@@ -17,26 +17,21 @@ export function ThemeProvider({ children }) {
     try {
       const stored = localStorage.getItem('upstock-theme');
       return stored === 'dark' || stored === 'light' || stored === 'auto' ? stored : 'dark';
-    } catch {
-      return 'dark';
-    }
+    } catch { return 'dark'; }
   });
 
   const resolved = resolveTheme(preference);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', resolved);
-    try {
-      localStorage.setItem('upstock-theme', preference);
-    } catch (_) { /* localStorage may be unavailable */ }
+    try { localStorage.setItem('upstock-theme', preference); } catch (_) {}
   }, [preference, resolved]);
 
   useEffect(() => {
     if (preference !== 'auto') return;
     const mq = window.matchMedia('(prefers-color-scheme: light)');
     const handler = () => {
-      const r = getSystemTheme();
-      document.documentElement.setAttribute('data-theme', r);
+      document.documentElement.setAttribute('data-theme', getSystemTheme());
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);

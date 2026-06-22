@@ -31,8 +31,8 @@ function Movimentacoes() {
         setTransactions(movRes.data);
         setProducts(prodRes.data);
       })
-      .catch((err) => { if (!abort.signal.aborted) console.error('Erro ao carregar dados:', err); })
-      .finally(() => { if (!abort.signal.aborted) setLoading(false); });
+      .catch((err) => { if (err.code !== 'ERR_CANCELED') console.error('Erro ao carregar dados:', err); })
+      .finally(() => setLoading(false));
     return abort;
   }, []);
 
@@ -225,7 +225,6 @@ function Movimentacoes() {
         </div>
       </div>
 
-      {/* Modal Registrar Movimentação */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowModal(false)}>
           <div className="bg-(--bg-card-color) border border-(--border-color) rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>

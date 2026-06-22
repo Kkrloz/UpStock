@@ -19,26 +19,15 @@ export function AuthProvider({ children }) {
     async function loadSession() {
       try {
         const currentUser = await authService.getCurrentUser();
-        if (!cancelled) {
-          setUser(currentUser);
-        }
+        if (!cancelled) setUser(currentUser);
       } catch (error) {
-        if (!cancelled) {
-          console.error('Erro ao carregar sessão:', error);
-        }
+        if (!cancelled) console.error('Erro ao carregar sessão:', error);
       } finally {
-        if (!cancelled) {
-          clearTimeout(timeout);
-          setLoading(false);
-        }
+        if (!cancelled) { clearTimeout(timeout); setLoading(false); }
       }
     }
     loadSession();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeout);
-    };
+    return () => { cancelled = true; clearTimeout(timeout); };
   }, []);
 
   const login = async (email, password) => {
@@ -47,24 +36,15 @@ export function AuthProvider({ children }) {
       const loggedUser = await authService.login(email, password);
       setUser(loggedUser);
       return loggedUser;
-    } catch (error) {
-      setLoading(false);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { setLoading(false); throw error; }
+    finally { setLoading(false); }
   };
 
   const logout = async () => {
     setLoading(true);
-    try {
-      await authService.logout();
-      setUser(null);
-    } catch (error) {
-      console.error('Erro ao sair:', error);
-    } finally {
-      setLoading(false);
-    }
+    try { await authService.logout(); setUser(null); }
+    catch (error) { console.error('Erro ao sair:', error); }
+    finally { setLoading(false); }
   };
 
   const register = async (name, email, password) => {
@@ -73,48 +53,25 @@ export function AuthProvider({ children }) {
       const newUser = await authService.register({ name, email, password });
       setUser(newUser);
       return newUser;
-    } catch (error) {
-      setLoading(false);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { setLoading(false); throw error; }
+    finally { setLoading(false); }
   };
 
-  const createUser = async (userData) => {
-    return authService.createUser(userData);
-  };
-
+  const createUser = async (userData) => authService.createUser(userData);
   const deleteUser = async (userId) => {
     if (!user) throw new Error('Não autenticado.');
     return authService.deleteUser(userId);
   };
-
-  const listUsers = async () => {
-    return authService.listUsers();
-  };
-
+  const listUsers = async () => authService.listUsers();
   const isAdmin = user?.role === 'admin';
 
-  const value = {
-    user,
-    loading,
-    isAdmin,
-    login,
-    register,
-    logout,
-    createUser,
-    deleteUser,
-    listUsers,
-  };
+  const value = { user, loading, isAdmin, login, register, logout, createUser, deleteUser, listUsers };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth deve ser utilizado dentro de um AuthProvider');
-  }
+  if (!context) throw new Error('useAuth deve ser utilizado dentro de um AuthProvider');
   return context;
 }

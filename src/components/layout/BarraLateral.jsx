@@ -12,23 +12,16 @@ function BarraLateral({ onClose }) {
   const { resolvedTheme } = useTheme();
   const logoSrc = resolvedTheme === 'dark' ? '/UpStock-branco.svg' : '/UpStock.svg';
 
-  const handleNav = () => {
-    if (onClose) onClose();
-  };
+  const handleNav = () => { if (onClose) onClose(); };
 
   return (
     <section className="flex flex-col h-full gap-4 justify-start items-start shrink-0 border-r border-(--border-color) overflow-y-auto">
-      {/* Cabeçalho com logo + fechar no mobile */}
       <div className="flex items-center justify-between gap-2 px-4 py-4 border-b border-(--border-color) w-full">
         <div className="flex items-center gap-2">
           <img src={logoSrc} alt="UpStock" className="w-8 h-8 sm:w-10 sm:h-10" />
           <h1 className="text-xl sm:text-2xl font-bold text-(--logo-text-color)">UpStock</h1>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-colors md:hidden cursor-pointer"
-          aria-label="Fechar menu"
-        >
+        <button onClick={onClose} className="p-1 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-colors md:hidden cursor-pointer" aria-label="Fechar menu">
           <X size={20} />
         </button>
       </div>

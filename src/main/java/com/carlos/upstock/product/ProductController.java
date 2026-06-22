@@ -43,4 +43,5 @@ public class ProductController {
     public void delete(@PathVariable Long id, Authentication authentication) {
         productService.delete(id, authentication.getName());
     }
+
 }

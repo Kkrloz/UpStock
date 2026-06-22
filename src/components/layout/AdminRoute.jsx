@@ -1,10 +1,6 @@
 import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 
-/**
- * AdminRoute — protege rotas exclusivas para administradores.
- * Usuários com role "user" são redirecionados para a raiz do sistema.
- */
 function AdminRoute() {
   const { user, loading, isAdmin } = useAuth();
 
@@ -17,13 +13,8 @@ function AdminRoute() {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" replace />;
-  }
+  if (!user) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/" replace />;
 
   return <Outlet />;
 }

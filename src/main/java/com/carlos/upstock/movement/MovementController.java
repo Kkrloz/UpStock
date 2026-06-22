@@ -1,5 +1,6 @@
 package com.carlos.upstock.movement;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -21,7 +22,8 @@ public class MovementController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public MovementModel create(@RequestBody CreateMovementRequest request, Authentication authentication) {
+    public MovementModel create(@Valid @RequestBody CreateMovementRequest request, Authentication authentication) {
         return movementService.create(request, authentication.getName());
     }
+
 }

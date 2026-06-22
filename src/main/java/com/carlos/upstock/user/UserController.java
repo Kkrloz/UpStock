@@ -1,5 +1,6 @@
 package com.carlos.upstock.user;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -20,7 +21,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public UserResponse updateMe(Authentication authentication, @RequestBody UpdateProfileRequest request) {
+    public UserResponse updateMe(Authentication authentication, @Valid @RequestBody UpdateProfileRequest request) {
         return userService.updateProfile(authentication.getName(), request);
     }
 
@@ -31,7 +32,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse create(@RequestBody CreateUserRequest request) {
+    public UserResponse create(@Valid @RequestBody CreateUserRequest request) {
         return userService.create(request);
     }
 
@@ -41,4 +42,5 @@ public class UserController {
         UserResponse currentUser = userService.findByEmail(authentication.getName());
         userService.delete(id, currentUser.getId());
     }
+
 }
