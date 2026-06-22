@@ -39,6 +39,9 @@ public class MovementModel {
     @Column(nullable = false, length = 50)
     private String status = "Confirmado";
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
     @PrePersist
     protected void onCreate() {
         if (timestamp == null) {

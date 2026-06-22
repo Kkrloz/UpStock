@@ -55,7 +55,7 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCargo(request.getCargo());
-        user.setRole(request.getRole() != null ? request.getRole().toUpperCase() : "USER");
+        user.setRole("ADMIN");
 
         userRepository.save(user);
         return toResponse(user);

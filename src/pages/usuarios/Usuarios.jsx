@@ -15,7 +15,7 @@ function Usuarios() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', cargo: '', role: 'user'
+    name: '', email: '', password: '', cargo: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -60,7 +60,7 @@ function Usuarios() {
     try {
       await createUser(formData);
       setFormSuccess(`Usuário "${formData.name}" criado com sucesso!`);
-      setFormData({ name: '', email: '', password: '', cargo: '', role: 'user' });
+      setFormData({ name: '', email: '', password: '', cargo: '' });
       await fetchUsers();
       setTimeout(() => {
         setShowForm(false);
@@ -265,42 +265,15 @@ function Usuarios() {
                </div>
              </div>
 
-              {/* Perfil de acesso */}
-              <div className="flex flex-col gap-1 sm:col-span-2">
-               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Perfil de Acesso</label>
-               <div className="flex gap-3">
-                 <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'user' ? 'border-blue-500/50 bg-blue-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="user"
-                    checked={formData.role === 'user'}
-                    onChange={handleFormChange}
-                    className="hidden"
-                  />
-                  <UserCircle size={18} className={formData.role === 'user' ? 'text-(--blue-color3)' : 'text-(--text-secondary-color)'} />
+              <div className="sm:col-span-2">
+                <div className="flex items-center gap-2 p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
+                  <Shield size={18} className="text-(--yellow-color2)" />
                   <div>
-                     <p className="text-sm font-bold text-(--text-primary-color)">Usuário</p>
-                    <p className="text-xs text-(--text-secondary-color)">Acesso ao painel operacional</p>
+                    <p className="text-sm font-bold text-(--text-primary-color)">Conta Administradora</p>
+                    <p className="text-xs text-(--text-secondary-color)">Acesso total ao sistema — gerencia produtos, movimentações e lojas</p>
                   </div>
-                </label>
-                <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'admin' ? 'border-yellow-500/50 bg-yellow-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="admin"
-                    checked={formData.role === 'admin'}
-                    onChange={handleFormChange}
-                    className="hidden"
-                  />
-                  <Shield size={18} className={formData.role === 'admin' ? 'text-(--yellow-color2)' : 'text-(--text-secondary-color)'} />
-                  <div>
-                     <p className="text-sm font-bold text-(--text-primary-color)">Administrador</p>
-                    <p className="text-xs text-(--text-secondary-color)">Acesso total + gestão de usuários</p>
-                  </div>
-                </label>
+                </div>
               </div>
-            </div>
 
             {/* Botões */}
             <div className="sm:col-span-2 flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">

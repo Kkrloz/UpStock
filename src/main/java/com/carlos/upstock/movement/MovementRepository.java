@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface MovementRepository extends JpaRepository<MovementModel, Long> {
     List<MovementModel> findAllByOrderByTimestampDesc();
+    List<MovementModel> findByUserIdOrderByTimestampDesc(Long userId);
 }

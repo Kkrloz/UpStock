@@ -36,25 +36,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-
-        UserModel user = new UserModel();
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole("USER");
-
-        userRepository.save(user);
-
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new LoginResponse(token, user.getName(), user.getEmail()));
-    }
-
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         var userOpt = userRepository.findByEmail(request.getEmail());

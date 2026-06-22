@@ -2,6 +2,8 @@ package com.carlos.upstock.movement;
 
 import com.carlos.upstock.product.ProductModel;
 import com.carlos.upstock.product.ProductRepository;
+import com.carlos.upstock.user.UserModel;
+import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,15 +18,26 @@ public class MovementService {
 
     private final MovementRepository movementRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
-    public List<MovementModel> findAll() {
-        return movementRepository.findAllByOrderByTimestampDesc();
+    public List<MovementModel> findAll(String email) {
+        UserModel user = getUser(email);
+        if ("ADMIN".equals(user.getRole())) {
+            return movementRepository.findAllByOrderByTimestampDesc();
+        }
+        return movementRepository.findByUserIdOrderByTimestampDesc(user.getId());
     }
 
     @Transactional
-    public MovementModel create(CreateMovementRequest request) {
+    public MovementModel create(CreateMovementRequest request, String email) {
+        UserModel user = getUser(email);
+
         ProductModel product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+
+        if (!"ADMIN".equals(user.getRole()) && !product.getUserId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
 
         String type = request.getType().toUpperCase();
         if (!type.equals("ENTRADA") && !type.equals("SAIDA")) {
@@ -47,8 +60,14 @@ public class MovementService {
         movement.setType(type);
         movement.setQuantity(request.getQuantity());
         movement.setUserName(request.getUserName());
+        movement.setUserId(user.getId());
         movement.setStatus("Confirmado");
 
         return movementRepository.save(movement);
+    }
+
+    private UserModel getUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 }

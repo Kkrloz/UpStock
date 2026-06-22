@@ -27,4 +27,7 @@ public class ProductModel {
 
     @Column(nullable = false)
     private Integer quantity = 0;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 }
