@@ -18,31 +18,26 @@ public class UpstockApplication {
 	@Bean
 	CommandLineRunner seedAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
-			var adminOpt = userRepository.findByEmail("admin@upstock.com");
+			String adminEmail = "admin@upstock.com";
+			String adminPassword = "CHANGE_ME";
+
+			var adminOpt = userRepository.findByEmail(adminEmail);
 			if (adminOpt.isEmpty()) {
 				UserModel admin = new UserModel();
 				admin.setName("Admin");
-				admin.setEmail("admin@upstock.com");
-				admin.setPassword(passwordEncoder.encode("CHANGE_ME"));
+				admin.setEmail(adminEmail);
+				admin.setPassword(passwordEncoder.encode(adminPassword));
 				admin.setCargo("Administrador");
 				admin.setRole("ADMIN");
 				userRepository.save(admin);
-				System.out.println("Default admin created: admin@upstock.com / CHANGE_ME");
+				System.out.println("Default admin created");
 			} else {
 				UserModel admin = adminOpt.get();
-				boolean changed = false;
-				if (!"ADMIN".equals(admin.getRole())) {
-					admin.setRole("ADMIN");
-					changed = true;
-				}
-				if (admin.getCargo() == null) {
-					admin.setCargo("Administrador");
-					changed = true;
-				}
-				if (changed) {
-					userRepository.save(admin);
-					System.out.println("Admin user updated with ADMIN role and cargo");
-				}
+				admin.setPassword(passwordEncoder.encode(adminPassword));
+				admin.setRole("ADMIN");
+				if (admin.getCargo() == null) admin.setCargo("Administrador");
+				userRepository.save(admin);
+				System.out.println("Admin password updated");
 			}
 		};
 	}
