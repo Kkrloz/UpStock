@@ -23,7 +23,6 @@ function Produtos() {
 
   const loadProducts = useCallback(() => {
     const abort = new AbortController();
-    setLoading(true);
     api.get('/products', { signal: abort.signal })
       .then((res) => setProducts(res.data))
       .catch((err) => { if (err.code !== 'ERR_CANCELED') console.error('Erro ao carregar produtos:', err); })
@@ -152,7 +151,7 @@ function Produtos() {
             Gerencie o catálogo de produtos, estoque e valores.
           </p>
         </div>
-        <button type="button" onClick={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
+        <button type="button" onClick={openCreate} onPointerDown={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
           <Plus size={18} className="sm:size-5 transition-transform duration-200 group-hover:rotate-90" />
           <span className="hidden xs:inline">Adicionar Produto</span>
           <span className="xs:hidden">Adicionar</span>
