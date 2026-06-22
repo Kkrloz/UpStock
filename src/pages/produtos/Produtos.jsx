@@ -210,7 +210,7 @@ function Produtos() {
                             <span>{product.storeName}</span>
                           </div>
                         ) : (
-                          <span title={product.userEmail} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-(--yellow-color2) border border-amber-500/20">
+                          <span title={`Email da loja: ${product.userEmail}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-(--yellow-color2) border border-amber-500/20">
                             Sem estabelecimento
                           </span>
                         )}
