@@ -20,8 +20,10 @@ public class ProductService {
         if ("ADMIN".equals(user.getRole())) {
             List<ProductModel> products = productRepository.findAll();
             for (ProductModel p : products) {
-                userRepository.findById(p.getUserId())
-                    .ifPresent(owner -> p.setStoreName(owner.getName()));
+                if (p.getUserId() != null) {
+                    userRepository.findById(p.getUserId())
+                        .ifPresent(owner -> p.setStoreName(owner.getName()));
+                }
             }
             return products;
         }

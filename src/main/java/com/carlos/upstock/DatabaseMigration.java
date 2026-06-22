@@ -21,7 +21,22 @@ class DatabaseMigration implements CommandLineRunner {
         try {
             jdbcTemplate.update("ALTER TABLE products ADD COLUMN IF NOT EXISTS user_id BIGINT NOT NULL DEFAULT 1");
             jdbcTemplate.update("ALTER TABLE movements ADD COLUMN IF NOT EXISTS user_id BIGINT NOT NULL DEFAULT 1");
-            log.info("Database migration: added user_id columns to products and movements");
+
+            jdbcTemplate.update("UPDATE products SET user_id = 1 WHERE user_id IS NULL");
+            jdbcTemplate.update("UPDATE movements SET user_id = 1 WHERE user_id IS NULL");
+
+            try {
+                jdbcTemplate.update("ALTER TABLE products ALTER COLUMN user_id SET NOT NULL");
+            } catch (Exception ignored) {}
+
+            try {
+                jdbcTemplate.update("ALTER TABLE movements ALTER COLUMN user_id SET NOT NULL");
+            } catch (Exception ignored) {}
+
+            jdbcTemplate.update("ALTER TABLE movements DROP CONSTRAINT IF EXISTS movements_product_id_fkey");
+            jdbcTemplate.update("ALTER TABLE movements ADD CONSTRAINT movements_product_id_fkey FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE");
+
+            log.info("Database migration: user_id columns + CASCADE FK on movements");
         } catch (Exception e) {
             log.warn("Migration could not run: {}", e.getMessage());
         }
