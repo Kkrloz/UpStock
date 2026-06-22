@@ -142,14 +142,6 @@ function Produtos() {
     p.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-32">
-        <div className="w-8 h-8 border-2 border-(--spinner-track) border-t-(--blue-color3) rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
