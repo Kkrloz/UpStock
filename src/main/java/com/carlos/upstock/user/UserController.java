@@ -19,6 +19,11 @@ public class UserController {
         return userService.findByEmail(authentication.getName());
     }
 
+    @PutMapping("/me")
+    public UserResponse updateMe(Authentication authentication, @RequestBody UpdateProfileRequest request) {
+        return userService.updateProfile(authentication.getName(), request);
+    }
+
     @GetMapping
     public List<UserResponse> findAll() {
         return userService.findAll();

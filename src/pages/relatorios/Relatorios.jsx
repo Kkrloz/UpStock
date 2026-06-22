@@ -41,7 +41,7 @@ function Relatorios() {
               <div className="flex justify-between items-center border-t border-(--border-color) pt-4">
                 <span className="text-xs text-(--text-secondary-color) flex items-center gap-1">
                   <Calendar size={14} />
-                  Atualizado há 1 hora
+                  {new Date().toLocaleDateString('pt-BR')}
                 </span>
                 <button className="bg-(--blue-color1) hover:bg-(--blue-color2) text-(--text-primary-color) font-semibold text-sm py-1.5 px-3 rounded-lg transition-colors">
                   Visualizar Relatório

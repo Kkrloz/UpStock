@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getInitials, getAvatarColor } from '../../utils/avatar';
+import api from '../../services/api';
 
 function passwordStrength(pwd) {
   if (!pwd) return { score: 0, label: '', color: '' };
@@ -150,9 +151,14 @@ function TabPerfil({ user }) {
     e.preventDefault();
     if (!name.trim()) { setFeedback({ type: 'error', msg: 'O nome não pode ficar em branco.' }); return; }
     setSaving(true); setFeedback(null);
-    await new Promise(r => setTimeout(r, 900));
-    setSaving(false);
-    setFeedback({ type: 'success', msg: 'Perfil atualizado com sucesso.' });
+    try {
+      await api.put('/users/me', { name, email, cargo: user?.cargo || '' });
+      setFeedback({ type: 'success', msg: 'Perfil atualizado com sucesso.' });
+    } catch (err) {
+      setFeedback({ type: 'error', msg: err.response?.data?.message || 'Erro ao salvar perfil.' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const initials   = getInitials(user?.name || name);
@@ -262,39 +268,30 @@ function TabSeguranca({ user }) {
   const mismatch = confirm && next && next !== confirm;
   const match    = confirm && next && next === confirm;
 
-  const SESSIONS = [
-    { id: 's1', device: 'Chrome — Windows 11', location: 'São Paulo, BR', time: 'Agora', current: true, Icon: Monitor },
-    { id: 's2', device: 'Safari — iPhone 15',  location: 'São Paulo, BR', time: 'Há 2h', current: false, Icon: Smartphone },
-    { id: 's3', device: 'Firefox — Ubuntu',    location: 'Rio de Janeiro, BR', time: 'Há 1d', current: false, Icon: Laptop },
-  ];
-
-  const [sessions, setSessions] = useState(SESSIONS);
-  const [revoking, setRevoking] = useState(null);
-
   const handlePassword = async e => {
     e.preventDefault();
     if (!curr || !next || !confirm) { setFb({ type:'error', msg:'Preencha todos os campos.' }); return; }
     if (next !== confirm)           { setFb({ type:'error', msg:'As senhas não coincidem.' }); return; }
     if (strength.score < 2)        { setFb({ type:'error', msg:'Escolha uma senha mais forte.' }); return; }
     setSaving(true); setFb(null);
-    await new Promise(r => setTimeout(r, 1000));
-    setSaving(false);
-    setCurr(''); setNext(''); setConf('');
-    setFb({ type:'success', msg:'Senha alterada com sucesso.' });
-  };
-
-  const revokeSession = async id => {
-    setRevoking(id);
-    await new Promise(r => setTimeout(r, 700));
-    setSessions(s => s.filter(x => x.id !== id));
-    setRevoking(null);
-  };
-
-  const revokeAll = async () => {
-    setRevoking('all');
-    await new Promise(r => setTimeout(r, 900));
-    setSessions(s => s.filter(x => x.current));
-    setRevoking(null);
+    try {
+      await api.post('/auth/change-password', {
+        currentPassword: curr,
+        newPassword: next,
+        confirmPassword: confirm,
+      });
+      setCurr(''); setNext(''); setConf('');
+      setFb({ type:'success', msg:'Senha alterada com sucesso.' });
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 401) {
+        setFb({ type:'error', msg:'Senha atual incorreta.' });
+      } else {
+        setFb({ type:'error', msg: err.response?.data?.message || 'Erro ao alterar senha.' });
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -342,42 +339,7 @@ function TabSeguranca({ user }) {
         </form>
       </SectionCard>
 
-      {/* Sessões */}
-      <SectionCard title="Sessões Ativas" description="Dispositivos onde sua conta está conectada.">
-        <div className="cfg-sessions">
-          {sessions.map(({ id, device, location, time, current, Icon }) => (
-            <div key={id} className="cfg-session-row">
-              <div className="cfg-session-icon"><Icon size={18}/></div>
-              <div className="cfg-session-info">
-                <p className="cfg-session-device">
-                  {device}
-                  {current && <span className="cfg-session-badge">Esta sessão</span>}
-                </p>
-                <p className="cfg-session-meta">{location} · {time}</p>
-              </div>
-              {!current && (
-                <button
-                  onClick={() => revokeSession(id)}
-                  disabled={revoking === id}
-                  className="cfg-session-revoke"
-                  title="Encerrar sessão"
-                >
-                  {revoking === id
-                    ? <div className="cfg-btn-spinner cfg-btn-spinner-sm"/>
-                    : <LogOut size={14}/>
-                  }
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-        {sessions.filter(s => !s.current).length > 0 && (
-          <button onClick={revokeAll} disabled={revoking === 'all'} className="cfg-btn-ghost cfg-btn-danger" style={{ marginTop: '12px' }}>
-            {revoking === 'all' ? <div className="cfg-btn-spinner"/> : <LogOut size={14}/>}
-            <span>Encerrar todas as outras sessões</span>
-          </button>
-        )}
-      </SectionCard>
+
     </div>
   );
 }

@@ -33,6 +33,18 @@ public class UserService {
         return toResponse(user);
     }
 
+    public UserResponse updateProfile(String email, UpdateProfileRequest request) {
+        UserModel user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (request.getName() != null) user.setName(request.getName());
+        if (request.getEmail() != null) user.setEmail(request.getEmail());
+        if (request.getCargo() != null) user.setCargo(request.getCargo());
+
+        userRepository.save(user);
+        return toResponse(user);
+    }
+
     public UserResponse create(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists");
