@@ -20,11 +20,16 @@ export const authService = {
 
     localStorage.setItem(TOKEN_KEY, token);
 
-    const meResponse = await api.get('/users/me');
-    const user = normalizeUser(meResponse.data);
-
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-    return user;
+    try {
+      const meResponse = await api.get('/users/me');
+      const user = normalizeUser(meResponse.data);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+      return user;
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(CURRENT_USER_KEY);
+      throw error;
+    }
   },
 
   async logout() {
@@ -71,10 +76,15 @@ export const authService = {
 
     localStorage.setItem(TOKEN_KEY, token);
 
-    const meResponse = await api.get('/users/me');
-    const user = normalizeUser(meResponse.data);
-
-    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
-    return user;
+    try {
+      const meResponse = await api.get('/users/me');
+      const user = normalizeUser(meResponse.data);
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+      return user;
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(CURRENT_USER_KEY);
+      throw error;
+    }
   },
 };
