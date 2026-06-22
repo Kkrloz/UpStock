@@ -60,3 +60,5 @@ HELP.md
 /dist/
 /nbdist/
 /.nb-gradle/
+
+.vercel
