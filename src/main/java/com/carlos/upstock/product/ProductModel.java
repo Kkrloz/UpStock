@@ -39,4 +39,9 @@ public class ProductModel {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String storeName;
 
+    @Transient
+    @JsonProperty
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String userEmail;
+
 }
