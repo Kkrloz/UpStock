@@ -2,6 +2,7 @@ package com.carlos.upstock;
 
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,11 +16,13 @@ public class UpstockApplication {
 		SpringApplication.run(UpstockApplication.class, args);
 	}
 
+	@Value("${admin.password}")
+	private String adminPassword;
+
 	@Bean
 	CommandLineRunner seedAdmin(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		return args -> {
 			String adminEmail = "admin@upstock.com";
-			String adminPassword = "CHANGE_ME";
 
 			var adminOpt = userRepository.findByEmail(adminEmail);
 			if (adminOpt.isEmpty()) {
@@ -37,7 +40,7 @@ public class UpstockApplication {
 				admin.setRole("ADMIN");
 				if (admin.getCargo() == null) admin.setCargo("Administrador");
 				userRepository.save(admin);
-				System.out.println("Admin password updated");
+				System.out.println("Admin password updated via ADMIN_PASSWORD env var");
 			}
 		};
 	}
