@@ -204,10 +204,16 @@ function Produtos() {
                   <tr key={product.id} className={`transition-colors ${idx % 2 === 0 ? 'bg-(--bg-card-color)' : 'bg-(--bg-subtle)'} hover:bg-(--bg-card-hover-color) group relative`}>
                     {isAdmin && (
                       <td className="py-3.5 px-4 sm:px-5 text-(--text-secondary-color) text-sm">
-                        <div className="flex items-center gap-1.5">
-                          <Store size={14} className="shrink-0 text-(--blue-color3)" />
-                          <span>{product.storeName || `Usuário #${product.userId}`}</span>
-                        </div>
+                        {product.storeName ? (
+                          <div className="flex items-center gap-1.5">
+                            <Store size={14} className="shrink-0 text-(--blue-color3)" />
+                            <span>{product.storeName}</span>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-(--yellow-color2) border border-amber-500/20">
+                            Sem estabelecimento
+                          </span>
+                        )}
                       </td>
                     )}
                     <td className="py-3.5 px-4 sm:px-5 font-semibold text-(--text-primary-color)">

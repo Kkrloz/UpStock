@@ -72,6 +72,26 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    public UserResponse updateUser(Long id, UpdateUserRequest request) {
+        UserModel user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (request.getName() != null) user.setName(request.getName());
+        if (request.getEmail() != null) {
+            if (!request.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+            }
+            user.setEmail(request.getEmail());
+        }
+        if (request.getPassword() != null) user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getCargo() != null) user.setCargo(request.getCargo());
+        if (request.getRole() != null) user.setRole(request.getRole().toUpperCase());
+        if (request.getStoreName() != null) user.setStoreName(request.getStoreName());
+
+        userRepository.save(user);
+        return toResponse(user);
+    }
+
     private UserResponse toResponse(UserModel user) {
         return new UserResponse(
                 user.getId(),

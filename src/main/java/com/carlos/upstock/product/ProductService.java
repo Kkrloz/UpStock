@@ -24,8 +24,7 @@ public class ProductService {
                 if (p.getUserId() != null) {
                     userRepository.findById(p.getUserId())
                         .ifPresent(owner -> {
-                            String sn = owner.getStoreName();
-                            p.setStoreName(sn != null ? sn : owner.getName());
+                            p.setStoreName(owner.getStoreName());
                         });
                 }
             }

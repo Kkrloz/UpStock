@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserPlus, Trash2, Shield, UserCircle,
   Mail, Lock, User, Briefcase, AlertCircle,
-  CheckCircle2, X, Eye, EyeOff, Crown, Store
+  CheckCircle2, X, Eye, EyeOff, Crown, Store, Pencil
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 function Usuarios() {
-  const { user: currentUser, createUser, deleteUser, listUsers } = useAuth();
+  const { user: currentUser, createUser, updateUser, deleteUser, listUsers } = useAuth();
 
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', cargo: '', role: 'user', storeName: ''
@@ -40,32 +41,60 @@ function Usuarios() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setFormData({
+      name: user.name || '',
+      email: user.email || '',
+      password: '',
+      cargo: user.cargo || '',
+      role: user.role || 'user',
+      storeName: user.storeName || '',
+    });
+    setFormError('');
+    setFormSuccess('');
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingUser(null);
+    setFormError('');
+    setFormSuccess('');
+  };
+
   const handleCreateUser = async (e) => {
     e.preventDefault();
     setFormError('');
     setFormSuccess('');
 
-    if (!formData.name || !formData.email || !formData.password) {
-      setFormError('Preencha nome, e-mail e senha.');
+    if (!formData.name || !formData.email) {
+      setFormError('Preencha nome e e-mail.');
       return;
     }
-    if (formData.password.length < 6) {
+    if (!editingUser && formData.password.length < 6) {
       setFormError('A senha deve ter pelo menos 6 caracteres.');
       return;
     }
 
     setFormLoading(true);
     try {
-      await createUser(formData);
-      setFormSuccess(`Usuário "${formData.name}" criado com sucesso!`);
+      if (editingUser) {
+        const payload = { name: formData.name, email: formData.email, cargo: formData.cargo, role: formData.role, storeName: formData.storeName };
+        if (formData.password) payload.password = formData.password;
+        await updateUser(editingUser.id, payload);
+        setFormSuccess(`Usuário "${formData.name}" atualizado com sucesso!`);
+      } else {
+        await createUser(formData);
+        setFormSuccess(`Usuário "${formData.name}" criado com sucesso!`);
+      }
       setFormData({ name: '', email: '', password: '', cargo: '', role: 'user', storeName: '' });
       await fetchUsers();
       setTimeout(() => {
-        setShowForm(false);
-        setFormSuccess('');
+        handleCloseForm();
       }, 1800);
     } catch (err) {
-      setFormError(err.message || 'Erro ao criar usuário.');
+      setFormError(err.message || (editingUser ? 'Erro ao atualizar usuário.' : 'Erro ao criar usuário.'));
     } finally {
       setFormLoading(false);
     }
@@ -102,7 +131,7 @@ function Usuarios() {
         </div>
         <button
           id="btn-novo-usuario"
-          onClick={() => { setShowForm(true); setFormError(''); setFormSuccess(''); }}
+          onClick={() => { setEditingUser(null); setShowForm(true); setFormError(''); setFormSuccess(''); setFormData({ name: '', email: '', password: '', cargo: '', role: 'user', storeName: '' }); }}
           className="flex items-center gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-md cursor-pointer"
         >
           <UserPlus size={16} />
@@ -151,12 +180,12 @@ function Usuarios() {
         <div className="bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-(--text-primary-color) flex items-center gap-2">
-              <UserPlus size={18} className="text-(--blue-color3)" />
-              Novo Usuário
+              {editingUser ? <Pencil size={18} className="text-(--yellow-color2)" /> : <UserPlus size={18} className="text-(--blue-color3)" />}
+              {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
             </h2>
             <button
-              onClick={() => { setShowForm(false); setFormError(''); setFormSuccess(''); }}
-               className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer"
+              onClick={handleCloseForm}
+              className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -213,19 +242,19 @@ function Usuarios() {
             </div>
 
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Senha *</label>
+              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Senha {!editingUser && '*'}</label>
               <div className="relative">
                 <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
                 <input
                   id="form-user-password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder={editingUser ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres'}
                   value={formData.password}
                   onChange={handleFormChange}
                   disabled={formLoading}
-                   className="w-full pl-9 pr-9 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
-                   required
+                  className="w-full pl-9 pr-9 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
+                  required={!editingUser}
                  />
                  <button
                    type="button"
@@ -311,7 +340,7 @@ function Usuarios() {
             <div className="sm:col-span-2 flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
               <button
                 type="button"
-                onClick={() => { setShowForm(false); setFormError(''); setFormSuccess(''); }}
+                onClick={handleCloseForm}
                 className="px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
               >
                 Cancelar
@@ -324,10 +353,12 @@ function Usuarios() {
               >
                 {formLoading ? (
                     <div className="w-4 h-4 border-2 border-(--spinner-track) border-t-(--spinner-top) rounded-full animate-spin" />
+                ) : editingUser ? (
+                  <Pencil size={15} />
                 ) : (
                   <UserPlus size={15} />
                 )}
-                {formLoading ? 'Criando...' : 'Criar Usuário'}
+                {formLoading ? (editingUser ? 'Salvando...' : 'Criando...') : editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
               </button>
             </div>
           </form>
@@ -385,6 +416,13 @@ function Usuarios() {
 
                 <p className="text-xs text-(--text-secondary-color) shrink-0 hidden md:block">{u.createdAt}</p>
 
+                <button
+                  onClick={() => handleEditUser(u)}
+                  title="Editar usuário"
+                  className="p-2 rounded-lg text-(--text-secondary-color) hover:text-(--yellow-color2) hover:bg-amber-500/10 transition-all cursor-pointer shrink-0"
+                >
+                  <Pencil size={15} />
+                </button>
                 <button
                   onClick={() => handleDeleteUser(u.id, u.name)}
                   disabled={deletingId === u.id || u.id === currentUser?.id}

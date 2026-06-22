@@ -70,6 +70,11 @@ export const authService = {
     await api.delete(`/users/${userId}`);
   },
 
+  async updateUser(userId, data) {
+    const response = await api.put(`/users/${userId}`, data);
+    return normalizeUser(response.data);
+  },
+
   async register({ name, email, password }) {
     const response = await api.post('/auth/register', { name, email, password });
     const { token } = response.data;

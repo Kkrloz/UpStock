@@ -58,6 +58,10 @@ export function AuthProvider({ children }) {
   };
 
   const createUser = async (userData) => authService.createUser(userData);
+  const updateUser = async (userId, userData) => {
+    if (!user) throw new Error('Não autenticado.');
+    return authService.updateUser(userId, userData);
+  };
   const deleteUser = async (userId) => {
     if (!user) throw new Error('Não autenticado.');
     return authService.deleteUser(userId);
@@ -65,7 +69,7 @@ export function AuthProvider({ children }) {
   const listUsers = async () => authService.listUsers();
   const isAdmin = user?.role === 'admin';
 
-  const value = { user, loading, isAdmin, login, register, logout, createUser, deleteUser, listUsers };
+  const value = { user, loading, isAdmin, login, register, logout, createUser, updateUser, deleteUser, listUsers };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
