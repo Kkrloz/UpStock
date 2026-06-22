@@ -40,6 +40,7 @@ public class UserService {
         if (request.getName() != null) user.setName(request.getName());
         if (request.getEmail() != null) user.setEmail(request.getEmail());
         if (request.getCargo() != null) user.setCargo(request.getCargo());
+        if (request.getStoreName() != null) user.setStoreName(request.getStoreName());
 
         userRepository.save(user);
         return toResponse(user);
@@ -55,6 +56,7 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCargo(request.getCargo());
+        user.setStoreName(request.getStoreName());
         user.setRole(request.getRole() != null ? request.getRole().toUpperCase() : "USER");
 
         userRepository.save(user);
@@ -77,6 +79,7 @@ public class UserService {
                 user.getEmail(),
                 user.getCargo(),
                 user.getRole(),
+                user.getStoreName(),
                 user.getCreatedAt()
         );
     }

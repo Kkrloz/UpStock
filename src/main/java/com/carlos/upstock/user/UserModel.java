@@ -32,6 +32,9 @@ public class UserModel {
 
     private String cargo;
 
+    @Column(name = "store_name")
+    private String storeName;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 

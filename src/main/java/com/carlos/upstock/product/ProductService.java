@@ -22,7 +22,10 @@ public class ProductService {
             for (ProductModel p : products) {
                 if (p.getUserId() != null) {
                     userRepository.findById(p.getUserId())
-                        .ifPresent(owner -> p.setStoreName(owner.getName()));
+                        .ifPresent(owner -> {
+                            String sn = owner.getStoreName();
+                            p.setStoreName(sn != null ? sn : owner.getName());
+                        });
                 }
             }
             return products;

@@ -4,7 +4,7 @@ import {
   CheckCircle2, AlertCircle, Monitor, Globe, Bell, Clock,
   Mail, MessageSquare, Smartphone, LogOut, Laptop, Lock,
   Sun, Moon, Languages, BellOff, BellRing, Check, X,
-  Upload, RefreshCw
+  Upload, RefreshCw, Store
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -127,6 +127,7 @@ function SectionCard({ title, description, children }) {
 function TabPerfil({ user }) {
   const [name, setName]         = useState(user?.name || '');
   const [email, setEmail]       = useState(user?.email || '');
+  const [storeName, setStoreName] = useState(user?.storeName || '');
   const [phone, setPhone]       = useState('');
   const [bio, setBio]           = useState('');
   const [avatar, setAvatar]     = useState(null); // base64 ou null
@@ -152,7 +153,7 @@ function TabPerfil({ user }) {
     if (!name.trim()) { setFeedback({ type: 'error', msg: 'O nome não pode ficar em branco.' }); return; }
     setSaving(true); setFeedback(null);
     try {
-      await api.put('/users/me', { name, email, cargo: user?.cargo || '' });
+      await api.put('/users/me', { name, email, cargo: user?.cargo || '', storeName });
       setFeedback({ type: 'success', msg: 'Perfil atualizado com sucesso.' });
     } catch (err) {
       setFeedback({ type: 'error', msg: err.response?.data?.message || 'Erro ao salvar perfil.' });
@@ -226,8 +227,11 @@ function TabPerfil({ user }) {
             <CfgInput id="cfg-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" />
           </div>
           <div className="cfg-field">
-            <FieldLabel>Telefone</FieldLabel>
-            <CfgInput id="cfg-phone" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+55 (11) 9 0000-0000" />
+            <FieldLabel>Estabelecimento</FieldLabel>
+            <div className="relative">
+              <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+              <CfgInput id="cfg-store" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Nome da sua loja" style={{ paddingLeft: '2.25rem' }} />
+            </div>
           </div>
           <div className="cfg-field">
             <FieldLabel hint="Somente leitura">Cargo</FieldLabel>

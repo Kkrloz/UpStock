@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserPlus, Trash2, Shield, UserCircle,
   Mail, Lock, User, Briefcase, AlertCircle,
-  CheckCircle2, X, Eye, EyeOff, Crown
+  CheckCircle2, X, Eye, EyeOff, Crown, Store
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -15,7 +15,7 @@ function Usuarios() {
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '', email: '', password: '', cargo: '', role: 'user'
+    name: '', email: '', password: '', cargo: '', role: 'user', storeName: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -60,7 +60,7 @@ function Usuarios() {
     try {
       await createUser(formData);
       setFormSuccess(`Usuário "${formData.name}" criado com sucesso!`);
-      setFormData({ name: '', email: '', password: '', cargo: '', role: 'user' });
+      setFormData({ name: '', email: '', password: '', cargo: '', role: 'user', storeName: '' });
       await fetchUsers();
       setTimeout(() => {
         setShowForm(false);
@@ -265,6 +265,24 @@ function Usuarios() {
                </div>
              </div>
 
+              {/* Nome do Estabelecimento */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Estabelecimento</label>
+                <div className="relative">
+                  <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+                  <input
+                    id="form-user-store"
+                    name="storeName"
+                    type="text"
+                    placeholder="Nome da loja/estabelecimento"
+                    value={formData.storeName}
+                    onChange={handleFormChange}
+                    disabled={formLoading}
+                    className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
+                  />
+                </div>
+              </div>
+
               {/* Perfil de acesso */}
               <div className="flex flex-col gap-1 sm:col-span-2">
                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Perfil de Acesso</label>
@@ -363,6 +381,7 @@ function Usuarios() {
                     )}
                   </div>
                   <p className="text-xs text-(--text-secondary-color) truncate">{u.email}</p>
+                  {u.storeName && <p className="text-xs text-(--text-tercery-color) truncate flex items-center gap-1"><Store size={10} />{u.storeName}</p>}
                   {u.cargo && <p className="text-xs text-(--text-tercery-color) truncate">{u.cargo}</p>}
                 </div>
 

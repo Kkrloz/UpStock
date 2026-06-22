@@ -12,4 +12,5 @@ public class UpdateProfileRequest {
     private String email;
     private String cargo;
     private String bio;
+    private String storeName;
 }

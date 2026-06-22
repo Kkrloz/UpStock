@@ -13,4 +13,5 @@ public class CreateUserRequest {
     private String password;
     private String cargo;
     private String role;
+    private String storeName;
 }

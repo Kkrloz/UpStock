@@ -15,5 +15,6 @@ public class UserResponse {
     private String email;
     private String cargo;
     private String role;
+    private String storeName;
     private LocalDateTime createdAt;
 }
