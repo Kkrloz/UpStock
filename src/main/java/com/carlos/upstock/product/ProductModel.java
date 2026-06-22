@@ -1,5 +1,6 @@
 package com.carlos.upstock.product;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -30,4 +31,8 @@ public class ProductModel {
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String storeName;
 }

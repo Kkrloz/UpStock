@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, AlertCircle, Edit, Trash2, X, Save } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Plus, Search, Filter, AlertCircle, Edit, Trash2, X, Save, Store } from 'lucide-react';
 import api from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 function Produtos() {
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -17,20 +19,41 @@ function Produtos() {
 
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
+  const isAdmin = user?.role === 'ADMIN';
+
+  const loadProducts = useCallback(() => {
     const abort = new AbortController();
     setLoading(true);
     api.get('/products', { signal: abort.signal })
       .then((res) => setProducts(res.data))
       .catch((err) => { if (!abort.signal.aborted) console.error('Erro ao carregar produtos:', err); })
       .finally(() => { if (!abort.signal.aborted) setLoading(false); });
-    return () => abort.abort();
+    return abort;
   }, []);
+
+  useEffect(() => {
+    const abort = loadProducts();
+    return () => abort.abort();
+  }, [loadProducts]);
 
   const formatPrice = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   const isLowStock = (qty) => qty <= 5;
+
+  const formatPriceInput = (raw) => {
+    const digits = raw.replace(/\D/g, '');
+    if (!digits) return '';
+    const num = parseInt(digits, 10) / 100;
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(num);
+  };
+
+  const unformatPrice = (formatted) => {
+    if (!formatted) return '';
+    const digits = formatted.replace(/\D/g, '');
+    if (!digits) return '';
+    return (parseInt(digits, 10) / 100).toFixed(2);
+  };
 
   const openCreate = () => {
     setEditingProduct(null);
@@ -160,6 +183,7 @@ function Produtos() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-(--border-color) bg-(--bg-subtle) text-xs font-semibold text-(--text-secondary-color) uppercase tracking-wider">
+                {isAdmin && <th className="py-3.5 px-4 sm:px-5">Loja</th>}
                 <th className="py-3.5 px-4 sm:px-5">Nome</th>
                 <th className="py-3.5 px-4 sm:px-5">Preço</th>
                 <th className="py-3.5 px-4 sm:px-5">Estoque</th>
@@ -170,7 +194,7 @@ function Produtos() {
             <tbody className="divide-y divide-(--border-color) text-sm">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="py-12 text-center text-(--text-secondary-color)">
+                  <td colSpan={isAdmin ? 6 : 5} className="py-12 text-center text-(--text-secondary-color)">
                     {search ? 'Nenhum produto encontrado para esta busca.' : 'Nenhum produto cadastrado.'}
                   </td>
                 </tr>
@@ -179,6 +203,14 @@ function Produtos() {
                 const lowStock = isLowStock(product.quantity);
                 return (
                   <tr key={product.id} className={`transition-colors ${idx % 2 === 0 ? 'bg-(--bg-card-color)' : 'bg-(--bg-subtle)'} hover:bg-(--bg-card-hover-color) group relative`}>
+                    {isAdmin && (
+                      <td className="py-3.5 px-4 sm:px-5 text-(--text-secondary-color) text-sm">
+                        <div className="flex items-center gap-1.5">
+                          <Store size={14} className="shrink-0 text-(--blue-color3)" />
+                          <span>{product.storeName || `Usuário #${product.userId}`}</span>
+                        </div>
+                      </td>
+                    )}
                     <td className="py-3.5 px-4 sm:px-5 font-semibold text-(--text-primary-color)">
                       <div>{product.name}</div>
                       {product.description && (
@@ -270,16 +302,22 @@ function Produtos() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Preço *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0,00"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) text-sm"
-                    required
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color) font-semibold text-sm pointer-events-none">R$</span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="0,00"
+                      value={formData.price ? formatPriceInput(formData.price) : ''}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw.length > 18) return;
+                        setFormData({ ...formData, price: unformatPrice(raw) });
+                      }}
+                      className="w-full pl-10 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) text-sm"
+                      required
+                    />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Quantidade *</label>

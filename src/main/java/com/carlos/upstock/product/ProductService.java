@@ -18,7 +18,12 @@ public class ProductService {
     public List<ProductModel> findAll(String email) {
         UserModel user = getUser(email);
         if ("ADMIN".equals(user.getRole())) {
-            return productRepository.findAll();
+            List<ProductModel> products = productRepository.findAll();
+            for (ProductModel p : products) {
+                userRepository.findById(p.getUserId())
+                    .ifPresent(owner -> p.setStoreName(owner.getName()));
+            }
+            return products;
         }
         return productRepository.findByUserId(user.getId());
     }

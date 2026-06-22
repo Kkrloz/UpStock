@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowUpRight, ArrowDownRight, Search, Filter, Plus, X, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -20,7 +20,7 @@ function Movimentacoes() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
-  useEffect(() => {
+  const loadData = useCallback(() => {
     const abort = new AbortController();
     setLoading(true);
     Promise.all([
@@ -33,8 +33,13 @@ function Movimentacoes() {
       })
       .catch((err) => { if (!abort.signal.aborted) console.error('Erro ao carregar dados:', err); })
       .finally(() => { if (!abort.signal.aborted) setLoading(false); });
-    return () => abort.abort();
+    return abort;
   }, []);
+
+  useEffect(() => {
+    const abort = loadData();
+    return () => abort.abort();
+  }, [loadData]);
 
   const formatDateTime = (ts) =>
     new Date(ts).toLocaleString('pt-BR', {
