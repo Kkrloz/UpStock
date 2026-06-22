@@ -20,21 +20,21 @@ function Movimentacoes() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
-  const loadData = () => {
+  useEffect(() => {
+    const abort = new AbortController();
     setLoading(true);
     Promise.all([
-      api.get('/movements'),
-      api.get('/products'),
+      api.get('/movements', { signal: abort.signal }),
+      api.get('/products', { signal: abort.signal }),
     ])
       .then(([movRes, prodRes]) => {
         setTransactions(movRes.data);
         setProducts(prodRes.data);
       })
-      .catch((err) => console.error('Erro ao carregar dados:', err))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { loadData(); }, []);
+      .catch((err) => { if (!abort.signal.aborted) console.error('Erro ao carregar dados:', err); })
+      .finally(() => { if (!abort.signal.aborted) setLoading(false); });
+    return () => abort.abort();
+  }, []);
 
   const formatDateTime = (ts) =>
     new Date(ts).toLocaleString('pt-BR', {

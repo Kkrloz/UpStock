@@ -7,9 +7,10 @@ function Notificacoes() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const abort = new AbortController();
     Promise.all([
-      api.get('/products'),
-      api.get('/movements'),
+      api.get('/products', { signal: abort.signal }),
+      api.get('/movements', { signal: abort.signal }),
     ])
       .then(([prodRes, movRes]) => {
         const list = [];
@@ -36,10 +37,11 @@ function Notificacoes() {
         });
 
         list.sort((a, b) => new Date(b.time) - new Date(a.time));
-        setNotifications(list);
+        if (!abort.signal.aborted) setNotifications(list);
       })
-      .catch((err) => console.error('Erro ao carregar notificações:', err))
-      .finally(() => setLoading(false));
+      .catch((err) => { if (!abort.signal.aborted) console.error('Erro ao carregar notificações:', err); })
+      .finally(() => { if (!abort.signal.aborted) setLoading(false); });
+    return () => abort.abort();
   }, []);
 
   if (loading) {

@@ -17,15 +17,15 @@ function Produtos() {
 
   const [search, setSearch] = useState('');
 
-  const loadProducts = () => {
+  useEffect(() => {
+    const abort = new AbortController();
     setLoading(true);
-    api.get('/products')
+    api.get('/products', { signal: abort.signal })
       .then((res) => setProducts(res.data))
-      .catch((err) => console.error('Erro ao carregar produtos:', err))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { loadProducts(); }, []);
+      .catch((err) => { if (!abort.signal.aborted) console.error('Erro ao carregar produtos:', err); })
+      .finally(() => { if (!abort.signal.aborted) setLoading(false); });
+    return () => abort.abort();
+  }, []);
 
   const formatPrice = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);

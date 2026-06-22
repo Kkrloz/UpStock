@@ -8,16 +8,20 @@ function Teste() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const abort = new AbortController();
     Promise.all([
-      api.get('/products'),
-      api.get('/movements'),
+      api.get('/products', { signal: abort.signal }),
+      api.get('/movements', { signal: abort.signal }),
     ])
       .then(([prodRes, movRes]) => {
-        setProducts(prodRes.data);
-        setMovements(movRes.data);
+        if (!abort.signal.aborted) {
+          setProducts(prodRes.data);
+          setMovements(movRes.data);
+        }
       })
-      .catch((err) => console.error('Erro ao carregar dashboard:', err))
-      .finally(() => setLoading(false));
+      .catch((err) => { if (!abort.signal.aborted) console.error('Erro ao carregar dashboard:', err); })
+      .finally(() => { if (!abort.signal.aborted) setLoading(false); });
+    return () => abort.abort();
   }, []);
 
   const formatCurrency = (value) =>

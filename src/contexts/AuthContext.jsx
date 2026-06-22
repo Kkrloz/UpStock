@@ -7,19 +7,38 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Carrega a sessão ativa ao montar a aplicação
   useEffect(() => {
+    let cancelled = false;
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        console.warn('Auth session loading timed out');
+        setLoading(false);
+      }
+    }, 10000);
+
     async function loadSession() {
       try {
         const currentUser = await authService.getCurrentUser();
-        setUser(currentUser);
+        if (!cancelled) {
+          setUser(currentUser);
+        }
       } catch (error) {
-        console.error('Erro ao carregar sessão:', error);
+        if (!cancelled) {
+          console.error('Erro ao carregar sessão:', error);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          clearTimeout(timeout);
+          setLoading(false);
+        }
       }
     }
     loadSession();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -62,29 +81,19 @@ export function AuthProvider({ children }) {
     }
   };
 
-  /**
-   * Cria um novo usuário. Exclusivo para administradores.
-   */
   const createUser = async (userData) => {
     return authService.createUser(userData);
   };
 
-  /**
-   * Remove um usuário. Exclusivo para administradores.
-   */
   const deleteUser = async (userId) => {
     if (!user) throw new Error('Não autenticado.');
     return authService.deleteUser(userId);
   };
 
-  /**
-   * Lista todos os usuários cadastrados. Exclusivo para administradores.
-   */
   const listUsers = async () => {
     return authService.listUsers();
   };
 
-  /** true se o usuário logado for administrador */
   const isAdmin = user?.role === 'admin';
 
   const value = {
