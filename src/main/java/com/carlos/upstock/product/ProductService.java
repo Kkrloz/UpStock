@@ -1,5 +1,6 @@
 package com.carlos.upstock.product;
 
+import com.carlos.upstock.sse.SseService;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final SseService sseService;
 
     public List<ProductModel> findAll(String email) {
         UserModel user = getUser(email);
@@ -52,7 +54,9 @@ public class ProductService {
     public ProductModel create(ProductModel product, String email) {
         UserModel user = getUser(email);
         product.setUserId(user.getId());
-        return productRepository.save(product);
+        ProductModel saved = productRepository.save(product);
+        sseService.broadcast("PRODUCT_CHANGED", saved.getId());
+        return saved;
     }
 
     public ProductModel update(Long id, ProductModel updatedProduct, String email) {
@@ -61,12 +65,15 @@ public class ProductService {
         product.setDescription(updatedProduct.getDescription());
         product.setPrice(updatedProduct.getPrice());
         product.setQuantity(updatedProduct.getQuantity());
-        return productRepository.save(product);
+        ProductModel saved = productRepository.save(product);
+        sseService.broadcast("PRODUCT_CHANGED", saved.getId());
+        return saved;
     }
 
     public void delete(Long id, String email) {
         ProductModel product = findById(id, email);
         productRepository.delete(product);
+        sseService.broadcast("PRODUCT_CHANGED", id);
     }
 
     private UserModel getUser(String email) {

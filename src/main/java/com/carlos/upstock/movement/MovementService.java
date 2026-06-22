@@ -2,6 +2,7 @@ package com.carlos.upstock.movement;
 
 import com.carlos.upstock.product.ProductModel;
 import com.carlos.upstock.product.ProductRepository;
+import com.carlos.upstock.sse.SseService;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class MovementService {
     private final MovementRepository movementRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final SseService sseService;
 
     public List<MovementModel> findAll(String email) {
         UserModel user = getUser(email);
@@ -63,7 +65,10 @@ public class MovementService {
         movement.setUserId(user.getId());
         movement.setStatus("Confirmado");
 
-        return movementRepository.save(movement);
+        MovementModel saved = movementRepository.save(movement);
+        sseService.broadcast("MOVEMENT_CREATED", saved.getId());
+        sseService.broadcast("PRODUCT_CHANGED", request.getProductId());
+        return saved;
     }
 
     private UserModel getUser(String email) {

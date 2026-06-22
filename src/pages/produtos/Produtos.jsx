@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Plus, Search, Filter, AlertCircle, Edit, Trash2, X, Save, Store } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSse } from '../../hooks/useSse';
 
 function Produtos() {
   const { user } = useAuth();
@@ -34,6 +35,13 @@ function Produtos() {
     const abort = loadProducts();
     return () => abort.abort();
   }, [loadProducts]);
+
+  useSse({
+    events: ['PRODUCT_CHANGED'],
+    onEvent: () => { loadProducts(); },
+    token: localStorage.getItem('upstock_token'),
+    enabled: !loading,
+  });
 
   const formatPrice = (value) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);

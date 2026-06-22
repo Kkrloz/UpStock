@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ArrowUpRight, ArrowDownRight, Search, Filter, Plus, X, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSse } from '../../hooks/useSse';
 
 function Movimentacoes() {
   const { user } = useAuth();
@@ -39,6 +40,13 @@ function Movimentacoes() {
     const abort = loadData();
     return () => abort.abort();
   }, [loadData]);
+
+  useSse({
+    events: ['MOVEMENT_CREATED', 'PRODUCT_CHANGED'],
+    onEvent: () => { loadData(); },
+    token: localStorage.getItem('upstock_token'),
+    enabled: !loading,
+  });
 
   const formatDateTime = (ts) =>
     new Date(ts).toLocaleString('pt-BR', {
