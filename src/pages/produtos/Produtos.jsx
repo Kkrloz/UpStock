@@ -55,12 +55,12 @@ function Produtos() {
     return (parseInt(digits, 10) / 100).toFixed(2);
   };
 
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setEditingProduct(null);
     setFormData({ name: '', description: '', price: '', quantity: '' });
     setFormError('');
     setShowModal(true);
-  };
+  }, []);
 
   const openEdit = (product) => {
     setEditingProduct(product);
@@ -152,7 +152,7 @@ function Produtos() {
             Gerencie o catálogo de produtos, estoque e valores.
           </p>
         </div>
-        <button onClick={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
+        <button type="button" onClick={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
           <Plus size={18} className="sm:size-5 transition-transform duration-200 group-hover:rotate-90" />
           <span className="hidden xs:inline">Adicionar Produto</span>
           <span className="xs:hidden">Adicionar</span>
@@ -171,7 +171,7 @@ function Produtos() {
           />
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
-          <button className="flex items-center justify-center gap-2 border border-(--border-color) hover:border-(--blue-border-soft) hover:bg-(--hover-bg) hover:text-(--badge-admin-text) text-(--text-primary-color) font-semibold py-2 px-4 rounded-xl text-sm transition-all w-full sm:w-auto cursor-pointer">
+          <button type="button" className="flex items-center justify-center gap-2 border border-(--border-color) hover:border-(--blue-border-soft) hover:bg-(--hover-bg) hover:text-(--badge-admin-text) text-(--text-primary-color) font-semibold py-2 px-4 rounded-xl text-sm transition-all w-full sm:w-auto cursor-pointer">
             <Filter size={16} />
             Filtros
           </button>
@@ -239,10 +239,10 @@ function Produtos() {
                     </td>
                     <td className="py-3.5 px-4 sm:px-5 text-right">
                       <div className="flex justify-end gap-1">
-                        <button onClick={() => openEdit(product)} className="p-2 hover:bg-(--active-bg) rounded-lg text-(--text-secondary-color) hover:text-(--badge-admin-text) transition-all cursor-pointer">
+                        <button type="button" onClick={() => openEdit(product)} className="p-2 hover:bg-(--active-bg) rounded-lg text-(--text-secondary-color) hover:text-(--badge-admin-text) transition-all cursor-pointer">
                           <Edit size={15} />
                         </button>
-                        <button onClick={() => setDeleteTarget(product)} className="p-2 hover:bg-(--danger-bg) rounded-lg text-(--text-secondary-color) hover:text-(--red-color4) transition-all cursor-pointer">
+                        <button type="button" onClick={() => setDeleteTarget(product)} className="p-2 hover:bg-(--danger-bg) rounded-lg text-(--text-secondary-color) hover:text-(--red-color4) transition-all cursor-pointer">
                           <Trash2 size={15} />
                         </button>
                       </div>
@@ -262,7 +262,7 @@ function Produtos() {
               <h2 className="text-lg sm:text-xl font-bold text-(--text-primary-color)">
                 {editingProduct ? 'Editar Produto' : 'Adicionar Produto'}
               </h2>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer">
+              <button type="button" onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer">
                 <X size={18} />
               </button>
             </div>
@@ -373,6 +373,7 @@ function Produtos() {
               </div>
               <div className="flex gap-3 w-full pt-2">
                 <button
+                  type="button"
                   onClick={() => setDeleteTarget(null)}
                   disabled={deleting}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
@@ -380,6 +381,7 @@ function Produtos() {
                   Cancelar
                 </button>
                 <button
+                  type="button"
                   onClick={handleDelete}
                   disabled={deleting}
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-(--red-color4) hover:bg-(--red-color5) text-white font-bold rounded-xl text-sm transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"

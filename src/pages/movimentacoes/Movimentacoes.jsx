@@ -49,11 +49,11 @@ function Movimentacoes() {
 
   const typeLabel = (type) => (type === 'ENTRADA' ? 'Entrada' : 'Saída');
 
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setFormData({ productId: '', productName: '', type: 'ENTRADA', quantity: '', userName: user?.name || '' });
     setFormError('');
     setShowModal(true);
-  };
+  }, []);
 
   const handleProductChange = (e) => {
     const pid = parseInt(e.target.value, 10);
@@ -124,7 +124,7 @@ function Movimentacoes() {
             Histórico completo de entradas e saídas do estoque.
           </p>
         </div>
-        <button onClick={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
+        <button type="button" onClick={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
           <Plus size={18} className="sm:size-5 transition-transform duration-200 group-hover:rotate-90" />
           <span className="hidden xs:inline">Registrar Movimentação</span>
           <span className="xs:hidden">Registrar</span>
@@ -144,6 +144,7 @@ function Movimentacoes() {
         </div>
         <div className="flex gap-3 w-full sm:w-auto relative">
           <button
+            type="button"
             onClick={() => setShowFilterMenu(!showFilterMenu)}
             className="flex items-center justify-center gap-2 border border-(--border-color) hover:bg-(--bg-card-hover-color) text-(--text-primary-color) font-semibold py-2 px-4 rounded-xl text-sm transition-all w-full sm:w-auto cursor-pointer"
           >
@@ -155,6 +156,7 @@ function Movimentacoes() {
               {['todos', 'ENTRADA', 'SAIDA'].map((opt) => (
                 <button
                   key={opt}
+                  type="button"
                   onClick={() => { setTypeFilter(opt); setShowFilterMenu(false); }}
                   className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer ${
                     typeFilter === opt
@@ -230,7 +232,7 @@ function Movimentacoes() {
           <div className="bg-(--bg-card-color) border border-(--border-color) rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-(--text-primary-color)">Registrar Movimentação</h2>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer">
+              <button type="button" onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer">
                 <X size={18} />
               </button>
             </div>
