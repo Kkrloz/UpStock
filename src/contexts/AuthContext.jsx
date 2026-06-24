@@ -66,7 +66,7 @@ export function AuthProvider({ children }) {
     if (!user) throw new Error('Não autenticado.');
     return authService.deleteUser(userId);
   };
-  const listUsers = async () => authService.listUsers();
+  const listUsers = async (params) => authService.listUsers(params);
   const isAdmin = user?.role === 'admin';
 
   const value = { user, loading, isAdmin, login, register, logout, createUser, updateUser, deleteUser, listUsers };

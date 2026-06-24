@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
@@ -73,7 +73,7 @@ function Login() {
         </form>
 
         <div className="login-register-link">
-          <span className="text-(--text-tercery-color)">UpStock — Gestão de Estoque</span>
+          <span className="text-(--text-tercery-color)">UpStock — Gerencie seu Estoque</span>
         </div>
       </div>
     </div>

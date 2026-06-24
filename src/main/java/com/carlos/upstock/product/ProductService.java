@@ -4,10 +4,12 @@ import com.carlos.upstock.sse.SseService;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -18,27 +20,57 @@ public class ProductService {
     private final UserRepository userRepository;
     private final SseService sseService;
 
-    public List<ProductModel> findAll(String email) {
+    public List<ProductModel> findAll(String email, String search,
+                                       BigDecimal minPrice, BigDecimal maxPrice,
+                                       Integer minStock, Integer maxStock) {
         UserModel user = getUser(email);
-        if ("ADMIN".equals(user.getRole())) {
-            List<ProductModel> products = productRepository.findAll();
-            for (ProductModel p : products) {
-                if (p.getUserId() != null) {
-                    userRepository.findById(p.getUserId())
-                        .ifPresent(owner -> {
-                            String sn = owner.getStoreName();
-                            if (sn != null && !sn.isBlank()) {
-                                p.setStoreName(sn);
-                            } else {
-                                p.setStoreName(null);
-                                p.setUserEmail(owner.getEmail());
-                            }
-                        });
-                }
-            }
-            return products;
+
+        Specification<ProductModel> spec = Specification.where((Specification<ProductModel>) null);
+
+        if (search != null && !search.isBlank()) {
+            String pattern = "%" + search.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) ->
+                cb.like(cb.lower(root.get("name")), pattern));
         }
-        return productRepository.findByUserId(user.getId());
+        if (minPrice != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("price"), minPrice));
+        }
+        if (maxPrice != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.lessThanOrEqualTo(root.get("price"), maxPrice));
+        }
+        if (minStock != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("quantity"), minStock));
+        }
+        if (maxStock != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.lessThanOrEqualTo(root.get("quantity"), maxStock));
+        }
+
+        if (!"ADMIN".equals(user.getRole())) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("userId"), user.getId()));
+        }
+
+        List<ProductModel> products = productRepository.findAll(spec);
+
+        for (ProductModel p : products) {
+            if (p.getUserId() != null) {
+                userRepository.findById(p.getUserId())
+                    .ifPresent(owner -> {
+                        String sn = owner.getStoreName();
+                        if (sn != null && !sn.isBlank()) {
+                            p.setStoreName(sn);
+                        } else {
+                            p.setStoreName(null);
+                            p.setUserEmail(owner.getEmail());
+                        }
+                    });
+            }
+        }
+        return products;
     }
 
     public ProductModel findById(Long id, String email) {

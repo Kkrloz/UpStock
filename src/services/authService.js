@@ -53,8 +53,8 @@ export const authService = {
     }
   },
 
-  async listUsers() {
-    const response = await api.get('/users');
+  async listUsers(params = {}) {
+    const response = await api.get('/users', { params });
     return response.data.map(normalizeUser);
   },
 

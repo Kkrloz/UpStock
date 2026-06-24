@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -16,8 +17,15 @@ public class ProductController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProductModel> findAll(Authentication authentication) {
-        return productService.findAll(authentication.getName());
+    public List<ProductModel> findAll(
+            Authentication authentication,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Integer minStock,
+            @RequestParam(required = false) Integer maxStock
+    ) {
+        return productService.findAll(authentication.getName(), search, minPrice, maxPrice, minStock, maxStock);
     }
 
     @GetMapping("/{id}")

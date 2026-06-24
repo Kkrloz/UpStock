@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserPlus, Trash2, Shield, UserCircle,
   Mail, Lock, User, Briefcase, AlertCircle,
-  CheckCircle2, X, Eye, EyeOff, Crown, Store, Pencil
+  CheckCircle2, X, Eye, EyeOff, Crown, Store, Pencil, Search
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -13,6 +13,9 @@ function Usuarios() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('todos');
 
   const [formData, setFormData] = useState({
     name: '', email: '', password: '', cargo: '', role: 'user', storeName: ''
@@ -25,10 +28,13 @@ function Usuarios() {
   const [deletingId, setDeletingId] = useState(null);
   const [deleteError, setDeleteError] = useState('');
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (opts = {}) => {
     setLoadingUsers(true);
     try {
-      const list = await listUsers();
+      const params = {};
+      if (opts.search) params.search = opts.search;
+      if (opts.role && opts.role !== 'todos') params.role = opts.role;
+      const list = await listUsers(params);
       setUsers(list);
     } finally {
       setLoadingUsers(false);
@@ -36,6 +42,18 @@ function Usuarios() {
   };
 
   useEffect(() => { fetchUsers(); }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchUsers({ search: search || undefined, role: roleFilter });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const handleRoleFilter = (role) => {
+    setRoleFilter(role);
+    fetchUsers({ search: search || undefined, role });
+  };
 
   const handleFormChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -89,7 +107,7 @@ function Usuarios() {
         setFormSuccess(`Usuário "${formData.name}" criado com sucesso!`);
       }
       setFormData({ name: '', email: '', password: '', cargo: '', role: 'user', storeName: '' });
-      await fetchUsers();
+      await fetchUsers({ search: search || undefined, role: roleFilter });
       setTimeout(() => {
         handleCloseForm();
       }, 1800);
@@ -106,7 +124,7 @@ function Usuarios() {
     setDeleteError('');
     try {
       await deleteUser(userId);
-      await fetchUsers();
+      await fetchUsers({ search: search || undefined, role: roleFilter });
     } catch (err) {
       setDeleteError(err.message || 'Erro ao remover usuário.');
     } finally {
@@ -176,6 +194,39 @@ function Usuarios() {
         </div>
       )}
 
+      <div className="flex flex-col sm:flex-row gap-3 items-center bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-lg">
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" size={18} />
+          <input
+            type="text"
+            placeholder="Buscar por nome ou e-mail..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-(--bg-subtle) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--placeholder) focus:outline-none focus:border-(--input-border-focus) text-sm"
+          />
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          {['todos', 'admin', 'user'].map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => handleRoleFilter(r)}
+              className={`px-3 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                roleFilter === r
+                  ? r === 'admin'
+                    ? 'bg-yellow-500/10 text-(--yellow-color2) border border-yellow-500/20'
+                    : r === 'user'
+                    ? 'bg-blue-500/10 text-(--blue-color3) border border-blue-500/20'
+                    : 'bg-(--active-bg) text-(--badge-admin-text) border border-(--blue-border-soft)'
+                  : 'border border-(--border-color) text-(--text-secondary-color) hover:bg-(--bg-card-hover-color)'
+              }`}
+            >
+              {r === 'todos' ? 'Todos' : r === 'admin' ? 'Admin' : 'Usuário'}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {showForm && (
         <div className="bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-xl">
           <div className="flex items-center justify-between mb-5">
@@ -220,150 +271,150 @@ function Usuarios() {
                    className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
                    required
                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">E-mail *</label>
+                <div className="relative">
+                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+                  <input
+                    id="form-user-email"
+                    name="email"
+                    type="email"
+                    placeholder="email@exemplo.com"
+                    value={formData.email}
+                    onChange={handleFormChange}
+                    disabled={formLoading}
+                    className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
+                   required
+                 />
                </div>
              </div>
 
              <div className="flex flex-col gap-1">
-               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">E-mail *</label>
+               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Senha {!editingUser && '*'}</label>
                <div className="relative">
-                 <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+                 <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
                  <input
-                   id="form-user-email"
-                   name="email"
-                   type="email"
-                   placeholder="email@exemplo.com"
-                   value={formData.email}
+                   id="form-user-password"
+                   name="password"
+                   type={showPassword ? 'text' : 'password'}
+                   placeholder={editingUser ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres'}
+                   value={formData.password}
                    onChange={handleFormChange}
                    disabled={formLoading}
-                   className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Senha {!editingUser && '*'}</label>
-              <div className="relative">
-                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
-                <input
-                  id="form-user-password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder={editingUser ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres'}
-                  value={formData.password}
-                  onChange={handleFormChange}
-                  disabled={formLoading}
-                  className="w-full pl-9 pr-9 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
-                  required={!editingUser}
-                 />
-                 <button
-                   type="button"
-                   tabIndex="-1"
-                   onClick={() => setShowPassword((p) => !p)}
-                   className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color) hover:text-(--text-primary-color) transition-colors"
-                >
-                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Cargo</label>
-              <div className="relative">
-                <Briefcase size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
-                <input
-                  id="form-user-cargo"
-                  name="cargo"
-                  type="text"
-                  placeholder="Ex: Operador de Estoque"
-                  value={formData.cargo}
-                  onChange={handleFormChange}
-                  disabled={formLoading}
-                   className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
-                 />
+                   className="w-full pl-9 pr-9 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
+                   required={!editingUser}
+                  />
+                  <button
+                    type="button"
+                    tabIndex="-1"
+                    onClick={() => setShowPassword((p) => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color) hover:text-(--text-primary-color) transition-colors"
+                 >
+                   {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                 </button>
                </div>
              </div>
 
              <div className="flex flex-col gap-1">
-               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Estabelecimento</label>
+               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Cargo</label>
                <div className="relative">
-                 <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+                 <Briefcase size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
                  <input
-                   id="form-user-store"
-                   name="storeName"
+                   id="form-user-cargo"
+                   name="cargo"
                    type="text"
-                   placeholder="Nome da loja/estabelecimento"
-                   value={formData.storeName}
+                   placeholder="Ex: Operador de Estoque"
+                   value={formData.cargo}
                    onChange={handleFormChange}
                    disabled={formLoading}
-                   className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
-                 />
+                    className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Estabelecimento</label>
+                <div className="relative">
+                  <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+                  <input
+                    id="form-user-store"
+                    name="storeName"
+                    type="text"
+                    placeholder="Nome da loja/estabelecimento"
+                    value={formData.storeName}
+                    onChange={handleFormChange}
+                    disabled={formLoading}
+                    className="w-full pl-9 pr-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) focus:ring-1 focus:ring-(--input-border-focus) text-sm transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1 sm:col-span-2">
+               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Perfil de Acesso</label>
+               <div className="flex gap-3">
+                 <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'user' ? 'border-blue-500/50 bg-blue-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
+                   <input
+                     type="radio"
+                     name="role"
+                     value="user"
+                     checked={formData.role === 'user'}
+                     onChange={handleFormChange}
+                     className="hidden"
+                   />
+                   <UserCircle size={18} className={formData.role === 'user' ? 'text-(--blue-color3)' : 'text-(--text-secondary-color)'} />
+                   <div>
+                     <p className="text-sm font-bold text-(--text-primary-color)">Loja</p>
+                     <p className="text-xs text-(--text-secondary-color)">Acesso próprio — vê apenas seus produtos</p>
+                   </div>
+                 </label>
+                 <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'admin' ? 'border-yellow-500/50 bg-yellow-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
+                   <input
+                     type="radio"
+                     name="role"
+                     value="admin"
+                     checked={formData.role === 'admin'}
+                     onChange={handleFormChange}
+                     className="hidden"
+                   />
+                   <Shield size={18} className={formData.role === 'admin' ? 'text-(--yellow-color2)' : 'text-(--text-secondary-color)'} />
+                   <div>
+                     <p className="text-sm font-bold text-(--text-primary-color)">Administrador</p>
+                     <p className="text-xs text-(--text-secondary-color)">Acesso total — gerencia todas as lojas</p>
+                   </div>
+                 </label>
                </div>
              </div>
 
-             <div className="flex flex-col gap-1 sm:col-span-2">
-              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Perfil de Acesso</label>
-              <div className="flex gap-3">
-                <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'user' ? 'border-blue-500/50 bg-blue-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="user"
-                    checked={formData.role === 'user'}
-                    onChange={handleFormChange}
-                    className="hidden"
-                  />
-                  <UserCircle size={18} className={formData.role === 'user' ? 'text-(--blue-color3)' : 'text-(--text-secondary-color)'} />
-                  <div>
-                    <p className="text-sm font-bold text-(--text-primary-color)">Loja</p>
-                    <p className="text-xs text-(--text-secondary-color)">Acesso próprio — vê apenas seus produtos</p>
-                  </div>
-                </label>
-                <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'admin' ? 'border-yellow-500/50 bg-yellow-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="admin"
-                    checked={formData.role === 'admin'}
-                    onChange={handleFormChange}
-                    className="hidden"
-                  />
-                  <Shield size={18} className={formData.role === 'admin' ? 'text-(--yellow-color2)' : 'text-(--text-secondary-color)'} />
-                  <div>
-                    <p className="text-sm font-bold text-(--text-primary-color)">Administrador</p>
-                    <p className="text-xs text-(--text-secondary-color)">Acesso total — gerencia todas as lojas</p>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div className="sm:col-span-2 flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
-              <button
-                type="button"
-                onClick={handleCloseForm}
-                className="px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                id="form-user-submit"
-                type="submit"
-                disabled={formLoading}
-                className="flex items-center gap-2 px-4 py-2.5 bg-(--blue-color3) hover:bg-(--blue-color2) text-white font-bold rounded-xl text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-              >
-                {formLoading ? (
-                    <div className="w-4 h-4 border-2 border-(--spinner-track) border-t-(--spinner-top) rounded-full animate-spin" />
-                ) : editingUser ? (
-                  <Pencil size={15} />
-                ) : (
-                  <UserPlus size={15} />
-                )}
-                {formLoading ? (editingUser ? 'Salvando...' : 'Criando...') : editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+             <div className="sm:col-span-2 flex flex-col-reverse sm:flex-row gap-3 justify-end pt-2">
+               <button
+                 type="button"
+                 onClick={handleCloseForm}
+                 className="px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
+               >
+                 Cancelar
+               </button>
+               <button
+                 id="form-user-submit"
+                 type="submit"
+                 disabled={formLoading}
+                 className="flex items-center gap-2 px-4 py-2.5 bg-(--blue-color3) hover:bg-(--blue-color2) text-white font-bold rounded-xl text-sm transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+               >
+                 {formLoading ? (
+                     <div className="w-4 h-4 border-2 border-(--spinner-track) border-t-(--spinner-top) rounded-full animate-spin" />
+                 ) : editingUser ? (
+                   <Pencil size={15} />
+                 ) : (
+                   <UserPlus size={15} />
+                 )}
+                 {formLoading ? (editingUser ? 'Salvando...' : 'Criando...') : editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
+               </button>
+             </div>
+           </form>
+         </div>
+       )}
 
       <div className="bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-(--border-color)">
@@ -378,7 +429,7 @@ function Usuarios() {
         ) : users.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-2">
             <Users size={36} className="text-(--text-tercery-color)" />
-            <p className="text-sm text-(--text-secondary-color)">Nenhum usuário cadastrado.</p>
+            <p className="text-sm text-(--text-secondary-color)">Nenhum usuário encontrado.</p>
           </div>
         ) : (
           <div className="divide-y divide-(--border-color)">

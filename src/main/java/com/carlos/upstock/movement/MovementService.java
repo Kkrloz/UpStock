@@ -6,11 +6,14 @@ import com.carlos.upstock.sse.SseService;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,12 +25,37 @@ public class MovementService {
     private final UserRepository userRepository;
     private final SseService sseService;
 
-    public List<MovementModel> findAll(String email) {
+    public List<MovementModel> findAll(String email, String search, String type,
+                                        LocalDateTime startDate, LocalDateTime endDate) {
         UserModel user = getUser(email);
-        if ("ADMIN".equals(user.getRole())) {
-            return movementRepository.findAllByOrderByTimestampDesc();
+
+        Specification<MovementModel> spec = Specification.where((Specification<MovementModel>) null);
+
+        if (search != null && !search.isBlank()) {
+            String pattern = "%" + search.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) ->
+                cb.like(cb.lower(root.get("productName")), pattern));
         }
-        return movementRepository.findByUserIdOrderByTimestampDesc(user.getId());
+        if (type != null && !type.isBlank() && !"todos".equalsIgnoreCase(type)) {
+            String finalType = type.toUpperCase();
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("type"), finalType));
+        }
+        if (startDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("timestamp"), startDate));
+        }
+        if (endDate != null) {
+            spec = spec.and((root, query, cb) ->
+                cb.lessThanOrEqualTo(root.get("timestamp"), endDate));
+        }
+
+        if (!"ADMIN".equals(user.getRole())) {
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("userId"), user.getId()));
+        }
+
+        return movementRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "timestamp"));
     }
 
     @Transactional

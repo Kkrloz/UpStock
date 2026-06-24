@@ -4,6 +4,32 @@ import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSse } from '../../hooks/useSse';
 
+const DATE_RANGES = [
+  { label: 'Todas as datas', days: null },
+  { label: 'Hoje', days: 0 },
+  { label: 'Esta Semana', days: 7 },
+  { label: 'Este Mês', days: 30 },
+  { label: 'Este Ano', days: 365 },
+];
+
+function toISODate(daysAgo) {
+  if (daysAgo == null) return null;
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+function toISODateEnd(daysAgo) {
+  if (daysAgo == null) return null;
+  const d = new Date();
+  if (daysAgo === 0) {
+    d.setHours(23, 59, 59, 999);
+    return d.toISOString();
+  }
+  return new Date().toISOString();
+}
+
 function Movimentacoes() {
   const { user } = useAuth();
   const [transactions, setTransactions] = useState([]);
@@ -12,7 +38,9 @@ function Movimentacoes() {
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('todos');
+  const [dateRangeIndex, setDateRangeIndex] = useState(0);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [showDateMenu, setShowDateMenu] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,10 +49,16 @@ function Movimentacoes() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
-  const loadData = useCallback(() => {
+  const loadData = useCallback((opts = {}) => {
+    const params = {};
+    if (opts.search) params.search = opts.search;
+    if (opts.type && opts.type !== 'todos') params.type = opts.type;
+    if (opts.startDate) params.startDate = opts.startDate;
+    if (opts.endDate) params.endDate = opts.endDate;
+
     const abort = new AbortController();
     Promise.all([
-      api.get('/movements', { signal: abort.signal }),
+      api.get('/movements', { params, signal: abort.signal }),
       api.get('/products', { signal: abort.signal }),
     ])
       .then(([movRes, prodRes]) => {
@@ -39,11 +73,34 @@ function Movimentacoes() {
   useEffect(() => {
     const abort = loadData();
     return () => abort.abort();
-  }, [loadData]);
+  }, []);
+
+  useEffect(() => {
+    const range = DATE_RANGES[dateRangeIndex];
+    const timer = setTimeout(() => {
+      loadData({
+        search: search || undefined,
+        type: typeFilter,
+        startDate: toISODate(range.days),
+        endDate: toISODateEnd(range.days),
+      });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const reloadWithFilters = useCallback(() => {
+    const range = DATE_RANGES[dateRangeIndex];
+    loadData({
+      search: search || undefined,
+      type: typeFilter,
+      startDate: toISODate(range.days),
+      endDate: toISODateEnd(range.days),
+    });
+  }, [search, typeFilter, dateRangeIndex, loadData]);
 
   useSse({
     events: ['MOVEMENT_CREATED', 'PRODUCT_CHANGED'],
-    onEvent: () => { loadData(); },
+    onEvent: reloadWithFilters,
     token: localStorage.getItem('upstock_token'),
     enabled: !loading,
   });
@@ -100,7 +157,7 @@ function Movimentacoes() {
         userName: formData.userName.trim(),
       });
       setShowModal(false);
-      loadData();
+      reloadWithFilters();
     } catch (err) {
       setFormError(err.response?.data?.message || 'Erro ao registrar movimentação.');
     } finally {
@@ -108,11 +165,28 @@ function Movimentacoes() {
     }
   };
 
-  const filtered = transactions.filter((t) => {
-    const matchSearch = t.productName.toLowerCase().includes(search.toLowerCase());
-    const matchType = typeFilter === 'todos' || t.type === typeFilter;
-    return matchSearch && matchType;
-  });
+  const handleTypeChange = (type) => {
+    setTypeFilter(type);
+    const range = DATE_RANGES[dateRangeIndex];
+    loadData({
+      search: search || undefined,
+      type,
+      startDate: toISODate(range.days),
+      endDate: toISODateEnd(range.days),
+    });
+  };
+
+  const handleDateChange = (index) => {
+    setDateRangeIndex(index);
+    setShowDateMenu(false);
+    const range = DATE_RANGES[index];
+    loadData({
+      search: search || undefined,
+      type: typeFilter,
+      startDate: toISODate(range.days),
+      endDate: toISODateEnd(range.days),
+    });
+  };
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
@@ -156,7 +230,7 @@ function Movimentacoes() {
                 <button
                   key={opt}
                   type="button"
-                  onClick={() => { setTypeFilter(opt); setShowFilterMenu(false); }}
+                  onClick={() => { setShowFilterMenu(false); handleTypeChange(opt); }}
                   className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer ${
                     typeFilter === opt
                       ? 'bg-(--active-bg) text-(--badge-admin-text) font-semibold'
@@ -164,6 +238,33 @@ function Movimentacoes() {
                   }`}
                 >
                   {opt === 'todos' ? 'Todos' : typeLabel(opt)}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowDateMenu(!showDateMenu)}
+            className={`flex items-center justify-center gap-2 border ${dateRangeIndex > 0 ? 'border-(--blue-border-soft) bg-(--active-bg) text-(--badge-admin-text)' : 'border-(--border-color) text-(--text-primary-color)'} hover:bg-(--bg-card-hover-color) font-semibold py-2 px-4 rounded-xl text-sm transition-all w-full sm:w-auto cursor-pointer`}
+          >
+            <Filter size={16} />
+            {DATE_RANGES[dateRangeIndex].label}
+          </button>
+          {showDateMenu && (
+            <div className="absolute top-full right-0 mt-1 bg-(--bg-card-color) border border-(--border-color) rounded-xl shadow-2xl z-10 min-w-[160px] overflow-hidden" style={{ right: 0 }}>
+              {DATE_RANGES.map((r, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleDateChange(i)}
+                  className={`w-full text-left px-4 py-2.5 text-sm transition-colors cursor-pointer ${
+                    dateRangeIndex === i
+                      ? 'bg-(--active-bg) text-(--badge-admin-text) font-semibold'
+                      : 'text-(--text-primary-color) hover:bg-(--bg-card-hover-color)'
+                  }`}
+                >
+                  {r.label}
                 </button>
               ))}
             </div>
@@ -185,16 +286,25 @@ function Movimentacoes() {
               </tr>
             </thead>
             <tbody className="divide-y divide-(--border-color) text-sm text-(--text-primary-color)">
-              {filtered.length === 0 && (
+              {loading ? (
                 <tr>
                   <td colSpan="6" className="py-12 text-center text-(--text-secondary-color)">
-                    {search || typeFilter !== 'todos'
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-5 h-5 border-2 border-(--spinner-track) border-t-(--blue-color3) rounded-full animate-spin" />
+                      <span>Carregando movimentações...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : transactions.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="py-12 text-center text-(--text-secondary-color)">
+                    {search || typeFilter !== 'todos' || dateRangeIndex > 0
                       ? 'Nenhuma movimentação encontrada para esta busca.'
                       : 'Nenhuma movimentação registrada.'}
                   </td>
                 </tr>
               )}
-              {filtered.map((t) => {
+              {transactions.map((t) => {
                 const IsInput = t.type === 'ENTRADA';
                 const Icon = IsInput ? ArrowUpRight : ArrowDownRight;
                 return (

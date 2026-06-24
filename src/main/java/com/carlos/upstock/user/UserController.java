@@ -26,8 +26,11 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponse> findAll() {
-        return userService.findAll();
+    public List<UserResponse> findAll(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role
+    ) {
+        return userService.findAll(search, role);
     }
 
     @PutMapping("/{id}")

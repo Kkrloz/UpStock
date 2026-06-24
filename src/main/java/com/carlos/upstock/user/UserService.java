@@ -15,8 +15,14 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UserResponse> findAll() {
-        return userRepository.findAll().stream()
+    public List<UserResponse> findAll(String search, String role) {
+        String roleParam = null;
+        if (role != null && !role.isBlank() && !"todos".equalsIgnoreCase(role)) {
+            roleParam = role.toUpperCase();
+        }
+        String searchParam = (search != null && !search.isBlank()) ? search : null;
+
+        return userRepository.searchUsers(searchParam, roleParam).stream()
                 .map(this::toResponse)
                 .toList();
     }
