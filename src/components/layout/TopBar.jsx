@@ -1,15 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, LogOut, Settings, ChevronDown, Shield, UserCircle, Sun, Moon, Menu } from 'lucide-react';
+import { LogOut, Settings, ChevronDown, Shield, UserCircle, Sun, Moon, Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getInitials, getAvatarColor } from '../../utils/avatar';
 
-function TopBar({ onSearch, onMenuToggle }) {
+function TopBar({ onMenuToggle }) {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const { resolvedTheme, toggleTheme } = useTheme();
-  const [searchValue, setSearchValue] = useState('');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef(null);
@@ -23,18 +22,6 @@ function TopBar({ onSearch, onMenuToggle }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  const handleSearchChange = (e) => {
-    setSearchValue(e.target.value);
-    if (onSearch) onSearch(e.target.value);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    if (searchValue.trim()) {
-      navigate(`/produtos?q=${encodeURIComponent(searchValue.trim())}`);
-    }
-  };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -50,13 +37,6 @@ function TopBar({ onSearch, onMenuToggle }) {
       <button onClick={onMenuToggle} className="p-2 rounded-xl text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer md:hidden shrink-0" aria-label="Abrir menu">
         <Menu size={20} />
       </button>
-
-      <form onSubmit={handleSearchSubmit} className="topbar-search-form">
-        <div className="topbar-search-wrapper">
-          <Search className="topbar-search-icon" size={18} />
-          <input id="topbar-search-input" type="text" placeholder="Buscar produtos..." value={searchValue} onChange={handleSearchChange} className="topbar-search-input" autoComplete="off" />
-        </div>
-      </form>
 
       <div className="flex items-center gap-1">
         <button onClick={toggleTheme} className="p-2 rounded-xl text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer" title={resolvedTheme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}>
