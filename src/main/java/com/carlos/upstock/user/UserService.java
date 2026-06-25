@@ -1,6 +1,7 @@
 package com.carlos.upstock.user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,13 +17,23 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public List<UserResponse> findAll(String search, String role) {
-        String roleParam = null;
-        if (role != null && !role.isBlank() && !"todos".equalsIgnoreCase(role)) {
-            roleParam = role.toUpperCase();
-        }
-        String searchParam = (search != null && !search.isBlank()) ? search.toLowerCase() : null;
+        Specification<UserModel> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
-        return userRepository.searchUsers(searchParam, roleParam).stream()
+        if (search != null && !search.isBlank()) {
+            String pattern = "%" + search.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) ->
+                cb.like(cb.lower(root.get("name")), pattern));
+            spec = spec.or((root, query, cb) ->
+                cb.like(cb.lower(root.get("email")), pattern));
+        }
+
+        if (role != null && !role.isBlank() && !"todos".equalsIgnoreCase(role)) {
+            String roleParam = role.toUpperCase();
+            spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("role"), roleParam));
+        }
+
+        return userRepository.findAll(spec).stream()
                 .map(this::toResponse)
                 .toList();
     }
