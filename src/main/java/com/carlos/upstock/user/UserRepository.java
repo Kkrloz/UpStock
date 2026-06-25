@@ -12,7 +12,7 @@ public interface UserRepository extends JpaRepository<UserModel, Long> {
     boolean existsByEmail(String email);
 
     @Query("SELECT u FROM UserModel u WHERE " +
-           "(:search IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "(:search IS NULL OR u.name LIKE CONCAT('%', :search, '%') OR u.email LIKE CONCAT('%', :search, '%')) AND " +
            "(:role IS NULL OR u.role = :role)")
     List<UserModel> searchUsers(@Param("search") String search, @Param("role") String role);
 }

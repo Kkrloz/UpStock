@@ -20,7 +20,7 @@ public class UserService {
         if (role != null && !role.isBlank() && !"todos".equalsIgnoreCase(role)) {
             roleParam = role.toUpperCase();
         }
-        String searchParam = (search != null && !search.isBlank()) ? search : null;
+        String searchParam = (search != null && !search.isBlank()) ? search.toLowerCase() : null;
 
         return userRepository.searchUsers(searchParam, roleParam).stream()
                 .map(this::toResponse)
