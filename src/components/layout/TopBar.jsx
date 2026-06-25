@@ -38,7 +38,7 @@ function TopBar({ onMenuToggle }) {
         <Menu size={20} />
       </button>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 ml-auto">
         <button onClick={toggleTheme} className="p-2 rounded-xl text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer" title={resolvedTheme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}>
           {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
