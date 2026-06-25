@@ -29,7 +29,7 @@ public class MovementService {
                                         LocalDateTime startDate, LocalDateTime endDate) {
         UserModel user = getUser(email);
 
-        Specification<MovementModel> spec = Specification.where((Specification<MovementModel>) null);
+        Specification<MovementModel> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (search != null && !search.isBlank()) {
             String pattern = "%" + search.toLowerCase() + "%";

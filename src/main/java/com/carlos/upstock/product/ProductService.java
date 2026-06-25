@@ -25,7 +25,7 @@ public class ProductService {
                                        Integer minStock, Integer maxStock) {
         UserModel user = getUser(email);
 
-        Specification<ProductModel> spec = Specification.where((Specification<ProductModel>) null);
+        Specification<ProductModel> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (search != null && !search.isBlank()) {
             String pattern = "%" + search.toLowerCase() + "%";
