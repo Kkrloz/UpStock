@@ -1,6 +1,7 @@
 package com.carlos.upstock.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -77,6 +79,7 @@ public class UserService {
         user.setRole(request.getRole() != null ? request.getRole().toUpperCase() : "USER");
 
         userRepository.save(user);
+        log.info("User '{}' ({}) created with role {}", request.getName(), request.getEmail(), user.getRole());
         return toResponse(user);
     }
 
@@ -87,6 +90,7 @@ public class UserService {
         UserModel user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         userRepository.delete(user);
+        log.warn("User '{}' ({}) deleted by admin {}", user.getName(), user.getEmail(), currentAdminId);
     }
 
     public UserResponse updateUser(Long id, UpdateUserRequest request) {
@@ -106,6 +110,7 @@ public class UserService {
         if (request.getStoreName() != null) user.setStoreName(request.getStoreName());
 
         userRepository.save(user);
+        log.info("User {} updated", user.getEmail());
         return toResponse(user);
     }
 

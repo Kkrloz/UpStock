@@ -4,6 +4,7 @@ import com.carlos.upstock.sse.SseService;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -56,6 +58,7 @@ public class ProductService {
 
         List<ProductModel> products = productRepository.findAll(spec);
 
+        log.debug("Found {} products for user {}", products.size(), email);
         for (ProductModel p : products) {
             if (p.getUserId() != null) {
                 userRepository.findById(p.getUserId())
@@ -87,6 +90,7 @@ public class ProductService {
         UserModel user = getUser(email);
         product.setUserId(user.getId());
         ProductModel saved = productRepository.save(product);
+        log.info("Product '{}' created by {}", saved.getName(), email);
         sseService.broadcast("PRODUCT_CHANGED", saved.getId());
         return saved;
     }
@@ -98,6 +102,7 @@ public class ProductService {
         product.setPrice(updatedProduct.getPrice());
         product.setQuantity(updatedProduct.getQuantity());
         ProductModel saved = productRepository.save(product);
+        log.info("Product '{}' updated by {}", saved.getName(), email);
         sseService.broadcast("PRODUCT_CHANGED", saved.getId());
         return saved;
     }
@@ -105,6 +110,7 @@ public class ProductService {
     public void delete(Long id, String email) {
         ProductModel product = findById(id, email);
         productRepository.delete(product);
+        log.info("Product '{}' deleted by {}", product.getName(), email);
         sseService.broadcast("PRODUCT_CHANGED", id);
     }
 

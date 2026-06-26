@@ -6,6 +6,7 @@ import com.carlos.upstock.sse.SseService;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MovementService {
@@ -94,6 +96,7 @@ public class MovementService {
         movement.setStatus("Confirmado");
 
         MovementModel saved = movementRepository.save(movement);
+        log.info("Movement {} ({} qty {}) created by {}", type, request.getProductName(), request.getQuantity(), email);
         sseService.broadcast("MOVEMENT_CREATED", saved.getId());
         sseService.broadcast("PRODUCT_CHANGED", request.getProductId());
         return saved;

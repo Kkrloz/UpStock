@@ -4,11 +4,13 @@ import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@Slf4j
 @SpringBootApplication
 public class UpstockApplication {
 
@@ -33,14 +35,14 @@ public class UpstockApplication {
 				admin.setCargo("Administrador");
 				admin.setRole("ADMIN");
 				userRepository.save(admin);
-				System.out.println("Default admin created");
+				log.info("Default admin created");
 			} else {
 				UserModel admin = adminOpt.get();
 				admin.setPassword(passwordEncoder.encode(adminPassword));
 				admin.setRole("ADMIN");
 				if (admin.getCargo() == null) admin.setCargo("Administrador");
 				userRepository.save(admin);
-				System.out.println("Admin password updated via ADMIN_PASSWORD env var");
+				log.info("Admin password updated via ADMIN_PASSWORD env var");
 			}
 		};
 	}

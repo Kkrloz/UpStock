@@ -7,6 +7,7 @@ import com.carlos.upstock.product.ProductRepository;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -26,6 +28,7 @@ public class ReportService {
 
     public ReportSummary getSummary(String email) {
         UserModel user = getUser(email);
+        log.debug("Generating report for {}", email);
 
         Specification<ProductModel> productSpec = Specification.where((root, query, cb) -> cb.conjunction());
         Specification<MovementModel> movementSpec = Specification.where((root, query, cb) -> cb.conjunction());
