@@ -1,7 +1,10 @@
 package com.carlos.upstock.security;
 
+import com.carlos.upstock.user.CreateUserRequest;
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
+import com.carlos.upstock.user.UserResponse;
+import com.carlos.upstock.user.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -29,6 +32,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final LoginRateLimiter rateLimiter;
+    private final UserService userService;
 
     @Operation(summary = "Alterar senha", description = "Altera a senha do usuário autenticado")
     @ApiResponses({
@@ -55,6 +59,20 @@ public class AuthController {
         userRepository.save(user);
         log.info("Password changed for {}", authentication.getName());
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Registrar", description = "Cria um novo usuário e retorna os tokens")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuário registrado com sucesso"),
+        @ApiResponse(responseCode = "409", description = "Email já cadastrado")
+    })
+    @PostMapping("/register")
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody CreateUserRequest request) {
+        UserResponse user = userService.create(request);
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        log.info("User {} registered successfully", user.getEmail());
+        return ResponseEntity.ok(new LoginResponse(token, refreshToken, user.getName(), user.getEmail()));
     }
 
     @Operation(summary = "Login", description = "Autentica o usuário e retorna tokens de acesso e refresh")
