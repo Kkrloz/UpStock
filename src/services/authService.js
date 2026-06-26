@@ -27,13 +27,15 @@ function clearTokens() {
 
 export const authService = {
   async login(email, password) {
-    const response = await api.post('/auth/login', { email, password });
-    const { token, refreshToken } = response.data;
-
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(REFRESH_KEY, refreshToken);
-
     try {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, refreshToken } = response.data;
+
+      if (!token || !refreshToken) throw new Error('Resposta inválida do servidor');
+
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(REFRESH_KEY, refreshToken);
+
       const meResponse = await api.get('/users/me');
       const user = normalizeUser(meResponse.data);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
@@ -86,13 +88,15 @@ export const authService = {
   },
 
   async register({ name, email, password }) {
-    const response = await api.post('/auth/register', { name, email, password });
-    const { token, refreshToken } = response.data;
-
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(REFRESH_KEY, refreshToken);
-
     try {
+      const response = await api.post('/auth/register', { name, email, password });
+      const { token, refreshToken } = response.data;
+
+      if (!token || !refreshToken) throw new Error('Resposta inválida do servidor');
+
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(REFRESH_KEY, refreshToken);
+
       const meResponse = await api.get('/users/me');
       const user = normalizeUser(meResponse.data);
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
