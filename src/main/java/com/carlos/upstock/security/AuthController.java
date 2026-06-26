@@ -2,6 +2,10 @@ package com.carlos.upstock.security;
 
 import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +16,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
+@Tag(name = "Auth", description = "Autenticação e gerenciamento de sessão")
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
@@ -23,6 +30,12 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final LoginRateLimiter rateLimiter;
 
+    @Operation(summary = "Alterar senha", description = "Altera a senha do usuário autenticado")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Senha alterada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Senhas não conferem"),
+        @ApiResponse(responseCode = "401", description = "Senha atual incorreta")
+    })
     @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(Authentication authentication, @Valid @RequestBody ChangePasswordRequest request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
@@ -44,6 +57,12 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Login", description = "Autentica o usuário e retorna tokens de acesso e refresh")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Login bem-sucedido"),
+        @ApiResponse(responseCode = "401", description = "Credenciais inválidas"),
+        @ApiResponse(responseCode = "429", description = "Muitas tentativas de login")
+    })
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
         if (rateLimiter.isBlocked(httpRequest)) {
@@ -62,8 +81,34 @@ public class AuthController {
         UserModel user = userOpt.get();
         rateLimiter.reset(request.getEmail());
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
         log.info("User {} logged in successfully", user.getEmail());
-        return ResponseEntity.ok(new LoginResponse(token, user.getName(), user.getEmail()));
+        return ResponseEntity.ok(new LoginResponse(token, refreshToken, user.getName(), user.getEmail()));
+    }
+
+    @Operation(summary = "Renovar token", description = "Gera novos tokens de acesso e refresh a partir do refresh token")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Tokens renovados"),
+        @ApiResponse(responseCode = "401", description = "Refresh token inválido ou expirado")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@RequestBody Map<String, String> body) {
+        String rt = body.get("refreshToken");
+        if (rt == null || !jwtUtil.isValidRefreshToken(rt)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = jwtUtil.extractEmail(rt);
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        UserModel user = userOpt.get();
+        String newToken = jwtUtil.generateToken(user.getEmail(), user.getRole());
+        String newRefreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+        log.debug("Token refreshed for {}", email);
+        return ResponseEntity.ok(new LoginResponse(newToken, newRefreshToken, user.getName(), user.getEmail()));
     }
 
 }

@@ -15,6 +15,7 @@ public class JwtUtil {
 
     private final String secret;
     private final long expiration;
+    private final long refreshExpiration = 7_604_800_000L; // 7 days
     private SecretKey secretKey;
 
     public JwtUtil(@Value("${jwt.secret}") String secret, @Value("${jwt.expiration}") long expiration) {
@@ -43,6 +44,16 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generateRefreshToken(String email) {
+        return Jwts.builder()
+                .subject(email)
+                .claim("type", "refresh")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
+                .signWith(secretKey)
+                .compact();
+    }
+
     public String extractEmail(String token) {
         return parseClaims(token).getSubject();
     }
@@ -55,6 +66,15 @@ public class JwtUtil {
         try {
             parseClaims(token);
             return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    public boolean isValidRefreshToken(String token) {
+        try {
+            Claims claims = parseClaims(token);
+            return "refresh".equals(claims.get("type", String.class));
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }

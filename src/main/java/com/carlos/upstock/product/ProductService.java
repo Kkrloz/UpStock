@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ public class ProductService {
     private final UserRepository userRepository;
     private final SseService sseService;
 
+    @Transactional(readOnly = true)
     public Page<ProductModel> findAll(String email, String search,
                                        BigDecimal minPrice, BigDecimal maxPrice,
                                        Integer minStock, Integer maxStock,
@@ -90,6 +92,7 @@ public class ProductService {
         return products;
     }
 
+    @Transactional(readOnly = true)
     public ProductModel findById(Long id, String email) {
         ProductModel product = productRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));

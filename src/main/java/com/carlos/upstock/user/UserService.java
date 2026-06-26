@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Slf4j
@@ -18,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(readOnly = true)
     public Page<UserResponse> findAll(String search, String role, Pageable pageable) {
         Specification<UserModel> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
@@ -38,12 +40,14 @@ public class UserService {
         return userRepository.findAll(spec, pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public UserResponse findById(Long id) {
         UserModel user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         return toResponse(user);
     }
 
+    @Transactional(readOnly = true)
     public UserResponse findByEmail(String email) {
         UserModel user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));

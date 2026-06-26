@@ -2,6 +2,7 @@ import api from './api';
 
 const CURRENT_USER_KEY = 'upstock_current_user';
 const TOKEN_KEY = 'upstock_token';
+const REFRESH_KEY = 'upstock_refresh_token';
 
 function normalizeUser(user) {
   return {
@@ -13,12 +14,24 @@ function normalizeUser(user) {
   };
 }
 
+function storeTokens(data) {
+  localStorage.setItem(TOKEN_KEY, data.token);
+  localStorage.setItem(REFRESH_KEY, data.refreshToken);
+}
+
+function clearTokens() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+  localStorage.removeItem(CURRENT_USER_KEY);
+}
+
 export const authService = {
   async login(email, password) {
     const response = await api.post('/auth/login', { email, password });
-    const { token } = response.data;
+    const { token, refreshToken } = response.data;
 
     localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(REFRESH_KEY, refreshToken);
 
     try {
       const meResponse = await api.get('/users/me');
@@ -26,15 +39,13 @@ export const authService = {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
       return user;
     } catch (error) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(CURRENT_USER_KEY);
+      clearTokens();
       throw error;
     }
   },
 
   async logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(CURRENT_USER_KEY);
+    clearTokens();
   },
 
   async getCurrentUser() {
@@ -47,8 +58,7 @@ export const authService = {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
       return user;
     } catch {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(CURRENT_USER_KEY);
+      clearTokens();
       return null;
     }
   },
@@ -77,9 +87,10 @@ export const authService = {
 
   async register({ name, email, password }) {
     const response = await api.post('/auth/register', { name, email, password });
-    const { token } = response.data;
+    const { token, refreshToken } = response.data;
 
     localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(REFRESH_KEY, refreshToken);
 
     try {
       const meResponse = await api.get('/users/me');
@@ -87,8 +98,7 @@ export const authService = {
       localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
       return user;
     } catch (error) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(CURRENT_USER_KEY);
+      clearTokens();
       throw error;
     }
   },

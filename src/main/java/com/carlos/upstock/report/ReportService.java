@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
@@ -30,6 +31,7 @@ public class ReportService {
     private final MovementRepository movementRepository;
     private final UserRepository userRepository;
 
+    @Transactional(readOnly = true)
     public ReportSummary getSummary(String email) {
         UserModel user = getUser(email);
         log.debug("Generating report for {}", email);
@@ -63,6 +65,7 @@ public class ReportService {
         return new ReportSummary(totalProducts, totalValue, movementsThisMonth, lowStockCount);
     }
 
+    @Transactional(readOnly = true)
     public List<InventoryItem> getInventory(String email) {
         UserModel user = getUser(email);
 

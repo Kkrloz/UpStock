@@ -27,6 +27,7 @@ public class MovementService {
     private final UserRepository userRepository;
     private final SseService sseService;
 
+    @Transactional(readOnly = true)
     public Page<MovementModel> findAll(String email, String search, String type,
                                         LocalDateTime startDate, LocalDateTime endDate,
                                         Pageable pageable) {

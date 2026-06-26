@@ -1,5 +1,5 @@
 import { LayoutGrid, Package, Truck, ChartColumnIncreasing, Bell, Settings, LogOut, Users, X } from 'lucide-react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import MenuButton from '../ui/MenuButton.jsx';
@@ -8,8 +8,14 @@ import TextoBar from '../ui/TextoBar.jsx';
 function BarraLateral({ onClose }) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const { isAdmin, logout } = useAuth();
   const { resolvedTheme } = useTheme();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
   const logoSrc = resolvedTheme === 'dark' ? '/UpStock-branco.svg' : '/UpStock.svg';
 
   const handleNav = () => { if (onClose) onClose(); };
@@ -43,7 +49,10 @@ function BarraLateral({ onClose }) {
             <MenuButton icon={Users} label="Usuários" to="/usuarios" active={currentPath === '/usuarios'} onClick={handleNav} />
           )}
           <MenuButton icon={Settings} label="Configurações" to="/configuracoes" active={currentPath === '/configuracoes'} onClick={handleNav} />
-          <MenuButton icon={LogOut} label="Sair" to="/sair" active={currentPath === '/sair'} onClick={handleNav} />
+          <button type="button" onClick={handleLogout} className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-(--text-secondary-color) hover:text-(--red-color4) hover:bg-(--danger-bg) transition-all cursor-pointer">
+            <LogOut size={16} />
+            <span>Sair</span>
+          </button>
         </div>
       </div>
     </section>

@@ -10,7 +10,6 @@ import Movimentacoes from '../pages/movimentacoes/Movimentacoes.jsx';
 import Relatorios from '../pages/relatorios/Relatorios.jsx';
 import Notificacoes from '../pages/notificacoes/Notificacoes.jsx';
 import Configuracoes from '../pages/configuracoes/Configuracoes.jsx';
-import Sair from '../pages/sair/Sair.jsx';
 import Login from '../pages/login/Login.jsx';
 import Usuarios from '../pages/usuarios/Usuarios.jsx';
 
@@ -20,8 +19,6 @@ function AppRoutes() {
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
       </Route>
-
-      <Route path="/sair" element={<Sair />} />
 
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
