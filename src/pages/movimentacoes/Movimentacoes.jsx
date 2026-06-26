@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowUpRight, ArrowDownRight, Search, Filter, Plus, X, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Search, Filter, Plus, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSse } from '../../hooks/useSse';
@@ -35,6 +35,8 @@ function Movimentacoes() {
   const [transactions, setTransactions] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('todos');
@@ -50,7 +52,7 @@ function Movimentacoes() {
   const [formError, setFormError] = useState('');
 
   const loadData = useCallback((opts = {}) => {
-    const params = {};
+    const params = { page: opts.page ?? 0 };
     if (opts.search) params.search = opts.search;
     if (opts.type && opts.type !== 'todos') params.type = opts.type;
     if (opts.startDate) params.startDate = opts.startDate;
@@ -59,11 +61,12 @@ function Movimentacoes() {
     const abort = new AbortController();
     Promise.all([
       api.get('/movements', { params, signal: abort.signal }),
-      api.get('/products', { signal: abort.signal }),
+      api.get('/products', { params: { size: 5000 }, signal: abort.signal }),
     ])
       .then(([movRes, prodRes]) => {
-        setTransactions(movRes.data);
-        setProducts(prodRes.data);
+        setTransactions(movRes.data.content || []);
+        setTotalPages(movRes.data.totalPages || 0);
+        setProducts(prodRes.data.content || []);
       })
       .catch((err) => { if (err.code !== 'ERR_CANCELED') console.error('Erro ao carregar dados:', err); })
       .finally(() => setLoading(false));
@@ -78,7 +81,9 @@ function Movimentacoes() {
   useEffect(() => {
     const range = DATE_RANGES[dateRangeIndex];
     const timer = setTimeout(() => {
+      setPage(0);
       loadData({
+        page: 0,
         search: search || undefined,
         type: typeFilter,
         startDate: toISODate(range.days),
@@ -88,15 +93,16 @@ function Movimentacoes() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const reloadWithFilters = useCallback(() => {
+  const reloadWithFilters = useCallback((targetPage) => {
     const range = DATE_RANGES[dateRangeIndex];
     loadData({
+      page: targetPage ?? page,
       search: search || undefined,
       type: typeFilter,
       startDate: toISODate(range.days),
       endDate: toISODateEnd(range.days),
     });
-  }, [search, typeFilter, dateRangeIndex, loadData]);
+  }, [search, page, typeFilter, dateRangeIndex, loadData]);
 
   useSse({
     events: ['MOVEMENT_CREATED', 'PRODUCT_CHANGED'],
@@ -165,10 +171,25 @@ function Movimentacoes() {
     }
   };
 
-  const handleTypeChange = (type) => {
-    setTypeFilter(type);
+  const goToPage = (newPage) => {
+    if (newPage < 0 || newPage >= totalPages) return;
+    setPage(newPage);
     const range = DATE_RANGES[dateRangeIndex];
     loadData({
+      page: newPage,
+      search: search || undefined,
+      type: typeFilter,
+      startDate: toISODate(range.days),
+      endDate: toISODateEnd(range.days),
+    });
+  };
+
+  const handleTypeChange = (type) => {
+    setTypeFilter(type);
+    setPage(0);
+    const range = DATE_RANGES[dateRangeIndex];
+    loadData({
+      page: 0,
       search: search || undefined,
       type,
       startDate: toISODate(range.days),
@@ -179,8 +200,10 @@ function Movimentacoes() {
   const handleDateChange = (index) => {
     setDateRangeIndex(index);
     setShowDateMenu(false);
+    setPage(0);
     const range = DATE_RANGES[index];
     loadData({
+      page: 0,
       search: search || undefined,
       type: typeFilter,
       startDate: toISODate(range.days),
@@ -335,6 +358,41 @@ function Movimentacoes() {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => goToPage(page - 1)}
+            disabled={page === 0}
+            className="p-2 rounded-lg border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goToPage(i)}
+              className={`min-w-[32px] h-8 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                page === i
+                  ? 'bg-(--blue-color3) text-white'
+                  : 'border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color)'
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => goToPage(page + 1)}
+            disabled={page >= totalPages - 1}
+            className="p-2 rounded-lg border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowModal(false)}>

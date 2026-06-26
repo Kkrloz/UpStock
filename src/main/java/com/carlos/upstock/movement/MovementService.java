@@ -7,7 +7,8 @@ import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -27,8 +27,9 @@ public class MovementService {
     private final UserRepository userRepository;
     private final SseService sseService;
 
-    public List<MovementModel> findAll(String email, String search, String type,
-                                        LocalDateTime startDate, LocalDateTime endDate) {
+    public Page<MovementModel> findAll(String email, String search, String type,
+                                        LocalDateTime startDate, LocalDateTime endDate,
+                                        Pageable pageable) {
         UserModel user = getUser(email);
 
         Specification<MovementModel> spec = Specification.where((root, query, cb) -> cb.conjunction());
@@ -57,7 +58,7 @@ public class MovementService {
                 cb.equal(root.get("userId"), user.getId()));
         }
 
-        return movementRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "timestamp"));
+        return movementRepository.findAll(spec, pageable);
     }
 
     @Transactional

@@ -1,13 +1,16 @@
 package com.carlos.upstock.product;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -19,15 +22,16 @@ public class ProductController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProductModel> findAll(
+    public Page<ProductModel> findAll(
             Authentication authentication,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) Integer minStock,
-            @RequestParam(required = false) Integer maxStock
+            @RequestParam(required = false) Integer maxStock,
+            @PageableDefault(size = 100) Pageable pageable
     ) {
-        return productService.findAll(authentication.getName(), search, minPrice, maxPrice, minStock, maxStock);
+        return productService.findAll(authentication.getName(), search, minPrice, maxPrice, minStock, maxStock, pageable);
     }
 
     @GetMapping("/{id}")
@@ -38,14 +42,14 @@ public class ProductController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductModel create(@RequestBody ProductModel product, Authentication authentication) {
-        return productService.create(product, authentication.getName());
+    public ProductModel create(@Valid @RequestBody CreateProductRequest request, Authentication authentication) {
+        return productService.create(request, authentication.getName());
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ProductModel update(@PathVariable Long id, @RequestBody ProductModel product, Authentication authentication) {
-        return productService.update(id, product, authentication.getName());
+    public ProductModel update(@PathVariable Long id, @Valid @RequestBody CreateProductRequest request, Authentication authentication) {
+        return productService.update(id, request, authentication.getName());
     }
 
     @DeleteMapping("/{id}")

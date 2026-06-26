@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router';
-import { Plus, Search, Filter as FilterIcon, AlertCircle, Edit, Trash2, X, Save, Store, RotateCcw } from 'lucide-react';
+import { Plus, Search, Filter as FilterIcon, AlertCircle, Edit, Trash2, X, Save, Store, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSse } from '../../hooks/useSse';
@@ -27,6 +27,8 @@ function Produtos() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -51,7 +53,7 @@ function Produtos() {
   const hasFilters = priceRangeIndex > 0 || stockRangeIndex > 0;
 
   const loadProducts = useCallback((opts = {}) => {
-    const params = {};
+    const params = { page: opts.page ?? 0 };
     if (opts.search) params.search = opts.search;
     if (opts.minPrice != null) params.minPrice = opts.minPrice;
     if (opts.maxPrice != null) params.maxPrice = opts.maxPrice;
@@ -60,7 +62,10 @@ function Produtos() {
 
     const abort = new AbortController();
     api.get('/products', { params, signal: abort.signal })
-      .then((res) => setProducts(res.data))
+      .then((res) => {
+        setProducts(res.data.content || []);
+        setTotalPages(res.data.totalPages || 0);
+      })
       .catch((err) => { if (err.code !== 'ERR_CANCELED') console.error('Erro ao carregar produtos:', err); })
       .finally(() => setLoading(false));
     return abort;
@@ -75,7 +80,9 @@ function Produtos() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      setPage(0);
       loadProducts({
+        page: 0,
         search: search || undefined,
         minPrice: currentPrice.minPrice,
         maxPrice: currentPrice.maxPrice,
@@ -86,15 +93,16 @@ function Produtos() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const reloadWithFilters = useCallback(() => {
+  const reloadWithFilters = useCallback((targetPage) => {
     loadProducts({
+      page: targetPage ?? page,
       search: search || undefined,
       minPrice: currentPrice.minPrice,
       maxPrice: currentPrice.maxPrice,
       minStock: currentStock.minStock,
       maxStock: currentStock.maxStock,
     });
-  }, [search, currentPrice.minPrice, currentPrice.maxPrice, currentStock.minStock, currentStock.maxStock, loadProducts]);
+  }, [search, page, currentPrice.minPrice, currentPrice.maxPrice, currentStock.minStock, currentStock.maxStock, loadProducts]);
 
   useSse({
     events: ['PRODUCT_CHANGED'],
@@ -204,13 +212,28 @@ function Produtos() {
     setShowFilters(true);
   };
 
+  const goToPage = (newPage) => {
+    if (newPage < 0 || newPage >= totalPages) return;
+    setPage(newPage);
+    loadProducts({
+      page: newPage,
+      search: search || undefined,
+      minPrice: currentPrice.minPrice,
+      maxPrice: currentPrice.maxPrice,
+      minStock: currentStock.minStock,
+      maxStock: currentStock.maxStock,
+    });
+  };
+
   const applyFilters = () => {
     setPriceRangeIndex(pendingPriceIndex);
     setStockRangeIndex(pendingStockIndex);
     setShowFilters(false);
+    setPage(0);
     const p = PRICE_RANGES[pendingPriceIndex];
     const s = STOCK_RANGES[pendingStockIndex];
     loadProducts({
+      page: 0,
       search: search || undefined,
       minPrice: p.minPrice,
       maxPrice: p.maxPrice,
@@ -223,7 +246,8 @@ function Produtos() {
     setPriceRangeIndex(0);
     setStockRangeIndex(0);
     setShowFilters(false);
-    loadProducts({ search: search || undefined });
+    setPage(0);
+    loadProducts({ page: 0, search: search || undefined });
   };
 
   return (
@@ -428,6 +452,41 @@ function Produtos() {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => goToPage(page - 1)}
+            disabled={page === 0}
+            className="p-2 rounded-lg border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => goToPage(i)}
+              className={`min-w-[32px] h-8 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                page === i
+                  ? 'bg-(--blue-color3) text-white'
+                  : 'border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color)'
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => goToPage(page + 1)}
+            disabled={page >= totalPages - 1}
+            className="p-2 rounded-lg border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+          >
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowModal(false)}>

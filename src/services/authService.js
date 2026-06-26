@@ -55,7 +55,7 @@ export const authService = {
 
   async listUsers(params = {}) {
     const response = await api.get('/users', { params });
-    return response.data.map(normalizeUser);
+    return { users: (response.data.content || []).map(normalizeUser), totalPages: response.data.totalPages || 0 };
   },
 
   async createUser({ name, email, password, cargo, role = 'user', storeName }) {

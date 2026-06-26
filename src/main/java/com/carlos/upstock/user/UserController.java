@@ -3,11 +3,12 @@ package com.carlos.upstock.user;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -28,11 +29,12 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponse> findAll(
+    public Page<UserResponse> findAll(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String role
+            @RequestParam(required = false) String role,
+            @PageableDefault(size = 100) Pageable pageable
     ) {
-        return userService.findAll(search, role);
+        return userService.findAll(search, role, pageable);
     }
 
     @PutMapping("/{id}")

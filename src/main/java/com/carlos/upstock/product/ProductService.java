@@ -5,13 +5,17 @@ import com.carlos.upstock.user.UserModel;
 import com.carlos.upstock.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -22,9 +26,10 @@ public class ProductService {
     private final UserRepository userRepository;
     private final SseService sseService;
 
-    public List<ProductModel> findAll(String email, String search,
+    public Page<ProductModel> findAll(String email, String search,
                                        BigDecimal minPrice, BigDecimal maxPrice,
-                                       Integer minStock, Integer maxStock) {
+                                       Integer minStock, Integer maxStock,
+                                       Pageable pageable) {
         UserModel user = getUser(email);
 
         Specification<ProductModel> spec = Specification.where((root, query, cb) -> cb.conjunction());
@@ -56,13 +61,19 @@ public class ProductService {
                 cb.equal(root.get("userId"), user.getId()));
         }
 
-        List<ProductModel> products = productRepository.findAll(spec);
+        Page<ProductModel> products = productRepository.findAll(spec, pageable);
 
-        log.debug("Found {} products for user {}", products.size(), email);
-        for (ProductModel p : products) {
-            if (p.getUserId() != null) {
-                userRepository.findById(p.getUserId())
-                    .ifPresent(owner -> {
+        Set<Long> userIds = products.stream()
+                .map(ProductModel::getUserId)
+                .collect(Collectors.toSet());
+        if (!userIds.isEmpty()) {
+            Map<Long, UserModel> userMap = userRepository.findAllById(userIds).stream()
+                    .collect(Collectors.toMap(UserModel::getId, u -> u));
+
+            for (ProductModel p : products) {
+                if (p.getUserId() != null) {
+                    UserModel owner = userMap.get(p.getUserId());
+                    if (owner != null) {
                         String sn = owner.getStoreName();
                         if (sn != null && !sn.isBlank()) {
                             p.setStoreName(sn);
@@ -70,9 +81,12 @@ public class ProductService {
                             p.setStoreName(null);
                             p.setUserEmail(owner.getEmail());
                         }
-                    });
+                    }
+                }
             }
         }
+
+        log.debug("Found {} products (page {}/{}) for user {}", products.getNumberOfElements(), pageable.getPageNumber(), products.getTotalPages(), email);
         return products;
     }
 
@@ -86,8 +100,13 @@ public class ProductService {
         return product;
     }
 
-    public ProductModel create(ProductModel product, String email) {
+    public ProductModel create(CreateProductRequest request, String email) {
         UserModel user = getUser(email);
+        ProductModel product = new ProductModel();
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
         product.setUserId(user.getId());
         ProductModel saved = productRepository.save(product);
         log.info("Product '{}' created by {}", saved.getName(), email);
@@ -95,12 +114,12 @@ public class ProductService {
         return saved;
     }
 
-    public ProductModel update(Long id, ProductModel updatedProduct, String email) {
+    public ProductModel update(Long id, CreateProductRequest request, String email) {
         ProductModel product = findById(id, email);
-        product.setName(updatedProduct.getName());
-        product.setDescription(updatedProduct.getDescription());
-        product.setPrice(updatedProduct.getPrice());
-        product.setQuantity(updatedProduct.getQuantity());
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
         ProductModel saved = productRepository.save(product);
         log.info("Product '{}' updated by {}", saved.getName(), email);
         sseService.broadcast("PRODUCT_CHANGED", saved.getId());

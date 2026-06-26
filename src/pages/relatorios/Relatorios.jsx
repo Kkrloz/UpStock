@@ -97,17 +97,6 @@ function Relatorios() {
       ]
     : [];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <div className="flex items-center gap-3 text-(--text-secondary-color)">
-          <div className="w-6 h-6 border-2 border-(--spinner-track) border-t-(--blue-color3) rounded-full animate-spin" />
-          <span>Carregando relatórios...</span>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
@@ -126,7 +115,21 @@ function Relatorios() {
         </div>
       )}
 
-      {summary && (
+      {loading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl p-4 sm:p-5 shadow-lg animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-(--bg-card-hover-color)" />
+                <div className="min-w-0 flex-1">
+                  <div className="h-3 bg-(--bg-card-hover-color) rounded w-20 mb-2" />
+                  <div className="h-5 bg-(--bg-card-hover-color) rounded w-16" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : summary && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
           {summaryCards.map((card, i) => {
             const Icon = card.icon;

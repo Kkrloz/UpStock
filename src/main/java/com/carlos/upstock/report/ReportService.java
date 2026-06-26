@@ -15,7 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -67,18 +71,30 @@ public class ReportService {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("userId"), user.getId()));
         }
 
-        return productRepository.findAll(spec).stream()
+        List<ProductModel> products = productRepository.findAll(spec);
+
+        Set<Long> userIds = products.stream()
+                .map(ProductModel::getUserId)
+                .collect(Collectors.toSet());
+        Map<Long, UserModel> userMap = Collections.emptyMap();
+        if (!userIds.isEmpty()) {
+            userMap = userRepository.findAllById(userIds).stream()
+                    .collect(Collectors.toMap(UserModel::getId, u -> u));
+        }
+
+        Map<Long, UserModel> finalUserMap = userMap;
+        return products.stream()
                 .map(p -> {
                     String storeName = null;
                     String userEmail = null;
                     if (p.getUserId() != null) {
-                        var owner = userRepository.findById(p.getUserId());
-                        if (owner.isPresent()) {
-                            String sn = owner.get().getStoreName();
+                        UserModel owner = finalUserMap.get(p.getUserId());
+                        if (owner != null) {
+                            String sn = owner.getStoreName();
                             if (sn != null && !sn.isBlank()) {
                                 storeName = sn;
                             } else {
-                                userEmail = owner.get().getEmail();
+                                userEmail = owner.getEmail();
                             }
                         }
                     }

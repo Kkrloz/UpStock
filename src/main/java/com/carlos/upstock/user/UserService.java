@@ -2,13 +2,13 @@ package com.carlos.upstock.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -18,7 +18,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UserResponse> findAll(String search, String role) {
+    public Page<UserResponse> findAll(String search, String role, Pageable pageable) {
         Specification<UserModel> spec = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (search != null && !search.isBlank()) {
@@ -35,9 +35,7 @@ public class UserService {
                 cb.equal(root.get("role"), roleParam));
         }
 
-        return userRepository.findAll(spec).stream()
-                .map(this::toResponse)
-                .toList();
+        return userRepository.findAll(spec, pageable).map(this::toResponse);
     }
 
     public UserResponse findById(Long id) {

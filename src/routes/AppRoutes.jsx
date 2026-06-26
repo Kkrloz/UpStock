@@ -4,7 +4,7 @@ import ProtectedRoute from '../components/layout/ProtectedRoute.jsx';
 import PublicRoute from '../components/layout/PublicRoute.jsx';
 import AdminRoute from '../components/layout/AdminRoute.jsx';
 
-import Teste from '../pages/teste/Teste.jsx';
+import Dashboard from '../pages/dashboard/Dashboard.jsx';
 import Produtos from '../pages/produtos/Produtos.jsx';
 import Movimentacoes from '../pages/movimentacoes/Movimentacoes.jsx';
 import Relatorios from '../pages/relatorios/Relatorios.jsx';
@@ -25,7 +25,7 @@ function AppRoutes() {
 
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
-          <Route path="/" element={<Teste />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/produtos" element={<Produtos />} />
           <Route path="/movimentacoes" element={<Movimentacoes />} />
           <Route path="/relatorios" element={<Relatorios />} />

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import {
   Users, UserPlus, Trash2, Shield, UserCircle,
   Mail, Lock, User, Briefcase, AlertCircle,
-  CheckCircle2, X, Eye, EyeOff, Crown, Store, Pencil, Search
+  CheckCircle2, X, Eye, EyeOff, Crown, Store, Pencil, Search,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -11,6 +12,8 @@ function Usuarios() {
 
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
@@ -31,11 +34,12 @@ function Usuarios() {
   const fetchUsers = async (opts = {}) => {
     setLoadingUsers(true);
     try {
-      const params = {};
+      const params = { page: opts.page ?? 0 };
       if (opts.search) params.search = opts.search;
       if (opts.role && opts.role !== 'todos') params.role = opts.role;
-      const list = await listUsers(params);
-      setUsers(list);
+      const result = await listUsers(params);
+      setUsers(result.users);
+      setTotalPages(result.totalPages);
     } finally {
       setLoadingUsers(false);
     }
@@ -45,14 +49,22 @@ function Usuarios() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchUsers({ search: search || undefined, role: roleFilter });
+      setPage(0);
+      fetchUsers({ page: 0, search: search || undefined, role: roleFilter });
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
   const handleRoleFilter = (role) => {
     setRoleFilter(role);
-    fetchUsers({ search: search || undefined, role });
+    setPage(0);
+    fetchUsers({ page: 0, search: search || undefined, role });
+  };
+
+  const goToPage = (newPage) => {
+    if (newPage < 0 || newPage >= totalPages) return;
+    setPage(newPage);
+    fetchUsers({ page: newPage, search: search || undefined, role: roleFilter });
   };
 
   const handleFormChange = (e) => {
@@ -488,6 +500,41 @@ function Usuarios() {
                 </button>
               </div>
             ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 py-4 border-t border-(--border-color)">
+            <button
+              type="button"
+              onClick={() => goToPage(page - 1)}
+              disabled={page === 0}
+              className="p-2 rounded-lg border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goToPage(i)}
+                className={`min-w-[32px] h-8 rounded-lg text-sm font-semibold transition-all cursor-pointer ${
+                  page === i
+                    ? 'bg-(--blue-color3) text-white'
+                    : 'border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color)'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => goToPage(page + 1)}
+              disabled={page >= totalPages - 1}
+              className="p-2 rounded-lg border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) disabled:opacity-30 disabled:pointer-events-none transition-all cursor-pointer"
+            >
+              <ChevronRight size={16} />
+            </button>
           </div>
         )}
       </div>
