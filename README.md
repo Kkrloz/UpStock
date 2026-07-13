@@ -1,6 +1,6 @@
 <div align="center">
   <h1>📦 UpStock</h1>
-  <p><strong>Sistema inteligente de gestão de estoque com acesso web e mobile, multiusuário, dashboards em tempo real e muito mais.</strong></p>
+  <p><strong>Smart inventory management system with web & mobile access, multi-user support, real-time dashboards and more.</strong></p>
 
   <p>
     <img src="https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=java&logoColor=white" alt="Java 21">
@@ -17,33 +17,33 @@
 
 ---
 
-## 📋 Sobre
+## 📋 About
 
-O **UpStock** é um sistema de gestão de estoque projetado para substituir planilhas e processos manuais. Com autenticação JWT, atualizações em tempo real via SSE, filtros server-side e relatórios exportáveis, oferece controle completo sobre produtos, movimentações e usuários.
-
----
-
-## ✨ Funcionalidades
-
-- **Dashboard** — Visão geral com indicadores do dia, valor total do estoque e capacidade utilizada
-- **Produtos** — Cadastro, edição, busca com filtros server-side, controle de quantidade e preço
-- **Movimentações** — Registro de entrada e saída com histórico completo e atualização automática do estoque
-- **Relatórios** — Cards de resumo, tabela de inventário e exportação CSV
-- **Usuários** — CRUD completo com papéis (admin/user), edição de perfil e loja
-- **Autenticação** — Login seguro com JWT (access token 24h + refresh token 7 dias), rate limit
-- **Tempo real** — Notificações SSE sem necessidade de recarregar a página
-- **Paginação** — Todos os endpoints listáveis retornam páginas com 100 itens
+**UpStock** is an inventory management system designed to replace spreadsheets and manual processes. With JWT authentication, real-time updates via SSE, server-side filters, and exportable reports, it provides complete control over products, movements, and users.
 
 ---
 
-## 🏗️ Arquitetura
+## ✨ Features
+
+- **Dashboard** — Overview with daily indicators, total inventory value, and capacity usage
+- **Products** — CRUD, search with server-side filters, quantity and price control
+- **Movements** — In/out logging with full history and automatic stock updates
+- **Reports** — Summary cards, inventory table, and CSV export
+- **Users** — Full CRUD with roles (admin/user), profile and store editing
+- **Authentication** — Secure JWT login (24h access token + 7-day refresh token), rate limiting
+- **Real-time** — SSE notifications without page reload
+- **Pagination** — All listable endpoints return pages of 100 items
+
+---
+
+## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     Vercel (Frontend)                        │
 │  React 19 + Vite + Tailwind CSS + Axios + React Router       │
 │                                                              │
-│  /api/(.*)  ───── proxy reverso ────►  Railway (Backend)     │
+│  /api/(.*)  ───── reverse proxy ────►  Railway (Backend)     │
 └──────────────────────────────────────────────────────────────┘
                          │
                          ▼
@@ -53,7 +53,7 @@ O **UpStock** é um sistema de gestão de estoque projetado para substituir plan
 │  Flyway + PostgreSQL 16 + Swagger/OpenAPI                     │
 │                                                              │
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐ │
-│  │ Produtos  │  │ Movim.   │  │ Usuários  │  │ Relatórios   │ │
+│  │ Products  │  │Movement s│  │  Users   │  │   Reports    │ │
 │  └────┬─────┘  └────┬─────┘  └────┬─────┘  └──────┬───────┘ │
 │       └──────────────┴─────────────┴────────────────┘         │
 │                           │                                   │
@@ -66,37 +66,37 @@ O **UpStock** é um sistema de gestão de estoque projetado para substituir plan
 
 ---
 
-## 🛠️ Tecnologias
+## 🛠️ Tech Stack
 
 ### Backend
 
-| Tecnologia | Versão | Finalidade |
+| Technology | Version | Purpose |
 |---|---|---|
 | Java | 21 | Runtime |
-| Spring Boot | 4.0.6 | Framework web |
-| Spring Security | 7.0 | Autenticação/autorização |
-| Spring Data JPA | — | Acesso a dados |
-| PostgreSQL | 16 | Banco de dados |
+| Spring Boot | 4.0.6 | Web framework |
+| Spring Security | 7.0 | Authentication/authorization |
+| Spring Data JPA | — | Data access |
+| PostgreSQL | 16 | Database |
 | Flyway | — | Migrations |
-| JWT (jjwt) | 0.13 | Tokens de acesso |
-| Lombok | — | Redução de boilerplate |
-| Swagger (SpringDoc) | 3.0.3 | Documentação OpenAPI |
+| JWT (jjwt) | 0.13 | Access tokens |
+| Lombok | — | Boilerplate reduction |
+| Swagger (SpringDoc) | 3.0.3 | OpenAPI documentation |
 
 ### Frontend
 
-| Tecnologia | Versão | Finalidade |
+| Technology | Version | Purpose |
 |---|---|---|
 | React | 19 | UI Library |
 | Vite | 8 | Build tool |
-| React Router | 7 | Roteamento SPA |
+| React Router | 7 | SPA routing |
 | Axios | — | HTTP client |
-| Tailwind CSS | — | Estilização |
+| Tailwind CSS | — | Styling |
 
 ---
 
-## 🚀 Começando
+## 🚀 Getting Started
 
-### Pré-requisitos
+### Prerequisites
 
 - JDK 21+
 - Maven 3.9+
@@ -110,30 +110,30 @@ O **UpStock** é um sistema de gestão de estoque projetado para substituir plan
 git clone https://github.com/Kkrloz/UpStock.git
 cd UpStock
 
-# Configure variáveis de ambiente
+# Configure environment variables
 cp .env.example .env
-# Edite .env com suas credenciais
+# Edit .env with your credentials
 
-# Execute as migrations e inicie
+# Run migrations and start
 mvn spring-boot:run -DskipTests
 ```
 
-A API estará em `http://localhost:8080`.  
-Swagger UI em `http://localhost:8080/swagger-ui.html`.
+The API will be at `http://localhost:8080`.  
+Swagger UI at `http://localhost:8080/swagger-ui.html`.
 
 ### Frontend
 
 ```bash
 cd UpStock
 
-# Instale as dependências
+# Install dependencies
 npm install
 
-# Inicie o servidor de desenvolvimento
+# Start dev server
 npm run dev
 ```
 
-O frontend estará em `http://localhost:5173`.
+The frontend will be at `http://localhost:5173`.
 
 ### Docker
 
@@ -143,31 +143,31 @@ docker compose up -d
 
 ---
 
-## 🔐 Variáveis de Ambiente
+## 🔐 Environment Variables
 
 ### Backend (`.env`)
 
-| Variável | Obrigatório | Padrão | Descrição |
+| Variable | Required | Default | Description |
 |---|---|---|---|
-| `SPRING_DATASOURCE_URL` | ✅ | — | URL JDBC do PostgreSQL |
-| `JWT_SECRET` | ✅ | — | Chave secreta JWT (mín. 32 caracteres) |
-| `JWT_EXPIRATION` | ❌ | `86400000` | Duração do access token (ms) |
-| `ADMIN_PASSWORD` | ✅ | — | Senha do admin inicial |
-| `SHOW_SQL` | ❌ | `false` | Exibir SQL no console |
+| `SPRING_DATASOURCE_URL` | ✅ | — | PostgreSQL JDBC URL |
+| `JWT_SECRET` | ✅ | — | JWT secret key (min 32 chars) |
+| `JWT_EXPIRATION` | ❌ | `86400000` | Access token duration (ms) |
+| `ADMIN_PASSWORD` | ✅ | — | Initial admin password |
+| `SHOW_SQL` | ❌ | `false` | Log SQL queries |
 
 ### Frontend
 
-| Variável | Obrigatório | Padrão | Descrição |
+| Variable | Required | Default | Description |
 |---|---|---|---|
-| `VITE_API_URL` | ❌ | `/api` | URL base da API (proxy em dev) |
+| `VITE_API_URL` | ❌ | `/api` | API base URL (dev proxy) |
 
 ---
 
-## 🌐 Deploy
+## 🌐 Deployment
 
 ### Backend — Railway
 
-O backend é implantado automaticamente no [Railway](https://railway.app) a partir do branch `master`. O `railway.json` define:
+The backend auto-deploys to [Railway](https://railway.app) from the `master` branch. `railway.json` defines:
 
 ```json
 {
@@ -176,56 +176,56 @@ O backend é implantado automaticamente no [Railway](https://railway.app) a part
 }
 ```
 
-**Variáveis necessárias no Railway:**
+**Required Railway variables:**
 
-- `SPRING_DATASOURCE_URL` — URL do banco PostgreSQL (Neon)
-- `JWT_SECRET` — Chave secreta JWT
-- `ADMIN_PASSWORD` — Senha do admin
+- `SPRING_DATASOURCE_URL` — PostgreSQL database URL (Neon)
+- `JWT_SECRET` — JWT secret key
+- `ADMIN_PASSWORD` — Admin password
 
 ### Frontend — Vercel
 
-O frontend é implantado no [Vercel](https://vercel.com) a partir do branch `master`. O `vercel.json` faz proxy das requisições `/api/*` para o Railway.
+The frontend auto-deploys to [Vercel](https://vercel.com) from the `master` branch. `vercel.json` proxies `/api/*` requests to Railway.
 
 ---
 
-## 📖 Documentação da API
+## 📖 API Documentation
 
-Com o backend rodando, acesse:
+With the backend running, access:
 
 - **Swagger UI:** `/swagger-ui.html`
 - **OpenAPI JSON:** `/v3/api-docs`
 
-### Endpoints principais
+### Main Endpoints
 
-| Método | Rota | Descrição |
+| Method | Route | Description |
 |---|---|---|
 | POST | `/api/auth/login` | Login |
-| POST | `/api/auth/register` | Cadastro |
-| POST | `/api/auth/refresh` | Renovar token |
-| GET | `/api/products` | Listar produtos (paginado) |
-| POST | `/api/products` | Criar produto |
-| GET | `/api/movements` | Listar movimentações (paginado) |
-| GET | `/api/users` | Listar usuários (paginado) |
-| GET | `/api/reports/summary` | Resumo do relatório |
-| GET | `/api/reports/inventory` | Inventário (CSV) |
+| POST | `/api/auth/register` | Register |
+| POST | `/api/auth/refresh` | Refresh token |
+| GET | `/api/products` | List products (paginated) |
+| POST | `/api/products` | Create product |
+| GET | `/api/movements` | List movements (paginated) |
+| GET | `/api/users` | List users (paginated) |
+| GET | `/api/reports/summary` | Report summary |
+| GET | `/api/reports/inventory` | Inventory CSV |
 
 ---
 
-## 👥 Papéis de usuário
+## 👥 User Roles
 
-| Papel | Acesso |
+| Role | Access |
 |---|---|
-| `ADMIN` | CRUD completo de produtos, movimentações, usuários e relatórios |
-| `USER` | CRUD de produtos e movimentações da própria loja |
+| `ADMIN` | Full CRUD for products, movements, users and reports |
+| `USER` | Product and movement CRUD for own store only |
 
 ---
 
-## 📄 Licença
+## 📄 License
 
-Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
 
 <p align="center">
-  Feito por <a href="https://github.com/Kkrloz">Kkrloz</a> e <a href="https://github.com/lMario09">lMario09</a>
+  Made by <a href="https://github.com/Kkrloz">Kkrloz</a> and <a href="https://github.com/lMario09">lMario09</a>
 </p>
