@@ -227,5 +227,5 @@ Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
 ---
 
 <p align="center">
-  Feito por <a href="https://github.com/Kkrloz">Kkrloz</a>
+  Feito por <a href="https://github.com/Kkrloz">Kkrloz</a> e <a href="https://github.com/lMario09">lMario09</a>
 </p>
