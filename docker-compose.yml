@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_DB: upstock
       POSTGRES_USER: upstock
-      POSTGRES_PASSWORD: CHANGE_ME
+      POSTGRES_PASSWORD: change-me
     ports:
       - "5432:5432"
     volumes:
@@ -17,9 +17,9 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/upstock
       SPRING_DATASOURCE_USERNAME: upstock
-      SPRING_DATASOURCE_PASSWORD: CHANGE_ME
-      JWT_SECRET: change-me-to-a-secure-random-key-at-least-32-chars
-      ADMIN_PASSWORD: CHANGE_ME
+      SPRING_DATASOURCE_PASSWORD: change-me
+      JWT_SECRET: generate-via-openssl-rand-base64-32
+      ADMIN_PASSWORD: change-me
     depends_on:
       - db
 
