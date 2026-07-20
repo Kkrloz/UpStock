@@ -164,8 +164,8 @@ function Landing() {
             <p className="landing-cta-desc">
               Entre em contato para criar seu acesso ao UpStock.
             </p>
-            <a href="https://wa.me/558999417503" target="_blank" rel="noopener noreferrer" className="landing-btn-primary landing-btn-lg" style={{ textDecoration: 'none' }}>
-              (89) 994-17503
+            <a href="https://wa.me/5589994017503" target="_blank" rel="noopener noreferrer" className="landing-btn-primary landing-btn-lg" style={{ textDecoration: 'none' }}>
+              (89) 99401-7503
               <ArrowRight size={16} />
             </a>
           </div>
