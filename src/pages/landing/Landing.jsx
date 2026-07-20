@@ -19,7 +19,7 @@ const features = [
 function Landing() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -46,6 +46,21 @@ function Landing() {
           <div className={`landing-nav-links ${menuOpen ? 'landing-nav-links-open' : ''}`}>
             <button onClick={() => scrollTo('features')} className="landing-nav-link">{t('landing.navFeatures')}</button>
             <button onClick={() => scrollTo('forwhom')} className="landing-nav-link">{t('landing.navForWhom')}</button>
+            <div className="landing-nav-lang">
+              <button
+                onClick={() => i18n.changeLanguage('pt')}
+                className={`landing-lang-btn ${i18n.language?.startsWith('pt') ? 'landing-lang-btn-active' : ''}`}
+              >
+                PT
+              </button>
+              <span className="landing-lang-sep">|</span>
+              <button
+                onClick={() => i18n.changeLanguage('en')}
+                className={`landing-lang-btn ${i18n.language?.startsWith('en') ? 'landing-lang-btn-active' : ''}`}
+              >
+                EN
+              </button>
+            </div>
             {user ? (
               <button onClick={() => navigate('/dashboard')} className="landing-btn-primary landing-btn-sm">
                 <LayoutDashboard size={16} />
