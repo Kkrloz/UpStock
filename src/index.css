@@ -1906,10 +1906,7 @@
 .landing-hero-bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 70% 50% at 50% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(59, 246, 143, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 20% 80%, rgba(246, 174, 59, 0.04) 0%, transparent 50%);
+  background: radial-gradient(ellipse 60% 40% at 50% 40%, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -1923,20 +1920,6 @@
   gap: 24px;
 }
 
-.landing-hero-badge {
-  display: inline-flex;
-  padding: 6px 16px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.2);
-  color: var(--blue-color3);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  animation: landing-fade-in-up 0.6s ease both;
-}
-
 .landing-hero-title {
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 900;
@@ -1946,10 +1929,7 @@
 }
 
 .landing-hero-title-accent {
-  background: linear-gradient(135deg, var(--blue-color3), var(--green-color4));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--blue-color3);
 }
 
 .landing-hero-subtitle {
@@ -1957,7 +1937,6 @@
   color: var(--text-secondary-color);
   max-width: 560px;
   line-height: 1.7;
-  animation: landing-fade-in-up 0.6s 0.2s ease both;
 }
 
 .landing-hero-actions {
@@ -1965,72 +1944,6 @@
   gap: 12px;
   flex-wrap: wrap;
   justify-content: center;
-  animation: landing-fade-in-up 0.6s 0.3s ease both;
-}
-
-/* Mockup */
-
-.landing-mockup {
-  display: flex;
-  gap: 14px;
-  margin-top: 32px;
-  animation: landing-fade-in-up 0.8s 0.4s ease both;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.landing-mockup-card {
-  background: var(--bg-card-color);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-width: 120px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s;
-}
-
-.landing-mockup-card:hover {
-  transform: translateY(-4px);
-}
-
-.landing-mockup-card-1 {
-  flex-direction: row;
-  gap: 8px;
-}
-
-.landing-mockup-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.landing-mockup-bar {
-  height: 8px;
-  border-radius: 99px;
-  opacity: 0.6;
-}
-
-.landing-mockup-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.landing-mockup-avatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 6px;
-  background: var(--blue-color1);
-  flex-shrink: 0;
-}
-
-.landing-mockup-line {
-  height: 6px;
-  border-radius: 99px;
-  background: var(--bg-raised);
 }
 
 /* Sections */
@@ -2137,7 +2050,7 @@
   line-height: 1.6;
 }
 
-/* Benefits */
+/* Benefits / For whom */
 
 .landing-benefits-grid {
   display: grid;
@@ -2150,8 +2063,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 32px 20px;
+  gap: 16px;
+  padding: 36px 24px;
   border-radius: 20px;
   background: var(--bg-card-color);
   border: 1px solid var(--border-color);
@@ -2161,17 +2074,6 @@
 .landing-benefit-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-}
-
-.landing-benefit-number {
-  font-size: 2.5rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  background: linear-gradient(135deg, var(--blue-color3), var(--green-color4));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1;
 }
 
 .landing-benefit-title {
@@ -2319,15 +2221,6 @@
 
   .landing-cta-card {
     padding: 40px 24px;
-  }
-
-  .landing-mockup {
-    gap: 10px;
-  }
-
-  .landing-mockup-card {
-    padding: 12px;
-    min-width: 90px;
   }
 
   .landing-footer-inner {

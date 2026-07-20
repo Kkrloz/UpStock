@@ -7,18 +7,12 @@ import {
 } from 'lucide-react';
 
 const features = [
-  { icon: Package, title: 'Produtos', desc: 'Catálogo completo com busca, filtros e controle de quantidade.', color: 'var(--blue-color3)' },
-  { icon: ArrowUpDown, title: 'Movimentações', desc: 'Registre entradas e saídas com detalhes de operador e data.', color: 'var(--green-color4)' },
-  { icon: BarChart3, title: 'Relatórios', desc: 'Insights detalhados e exportação de dados do seu estoque.', color: 'var(--yellow-color2)' },
-  { icon: Bell, title: 'Notificações', desc: 'Alertas inteligentes de estoque baixo e movimentações críticas.', color: 'var(--red-color4)' },
-  { icon: Users, title: 'Usuários', desc: 'Controle de acesso por perfil — admin, operador e visualizador.', color: 'var(--blue-color3)' },
-  { icon: Settings, title: 'Configurações', desc: 'Personalize temas, perfil e preferências do sistema.', color: 'var(--green-color4)' },
-];
-
-const benefits = [
-  { title: 'Simplicidade', desc: 'Interface moderna e intuitiva — sua equipe opera sem curva de aprendizado.' },
-  { title: 'Confiabilidade', desc: 'Dados sincronizados em tempo real com dashboard sempre atualizado.' },
-  { title: 'Escalabilidade', desc: 'Do pequeno comércio à grande indústria — o UpStock cresce com você.' },
+  { icon: Package, title: 'Produtos', desc: 'Cadastro, busca e controle de quantidade.', color: 'var(--blue-color3)' },
+  { icon: ArrowUpDown, title: 'Movimentações', desc: 'Entradas e saídas com histórico completo.', color: 'var(--green-color4)' },
+  { icon: BarChart3, title: 'Relatórios', desc: 'Dados do estoque organizados pra consulta.', color: 'var(--yellow-color2)' },
+  { icon: Bell, title: 'Notificações', desc: 'Alerta quando o estoque de um produto está baixo.', color: 'var(--red-color4)' },
+  { icon: Users, title: 'Usuários', desc: 'Admin, operador e visualizador — cada um com seu acesso.', color: 'var(--blue-color3)' },
+  { icon: Settings, title: 'Configurações', desc: 'Tema escuro/claro, perfil e preferências.', color: 'var(--green-color4)' },
 ];
 
 function Landing() {
@@ -40,7 +34,6 @@ function Landing() {
 
   return (
     <div className="landing">
-      {/* Navbar */}
       <nav className={`landing-nav ${scrolled ? 'landing-nav-scrolled' : ''}`}>
         <div className="landing-nav-inner">
           <div className="landing-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -50,8 +43,7 @@ function Landing() {
 
           <div className={`landing-nav-links ${menuOpen ? 'landing-nav-links-open' : ''}`}>
             <button onClick={() => scrollTo('features')} className="landing-nav-link">Funcionalidades</button>
-            <button onClick={() => scrollTo('benefits')} className="landing-nav-link">Por que UpStock?</button>
-            <button onClick={() => scrollTo('cta')} className="landing-nav-link">Contato</button>
+            <button onClick={() => scrollTo('forwhom')} className="landing-nav-link">Pra quem é</button>
             {user ? (
               <button onClick={() => navigate('/dashboard')} className="landing-btn-primary landing-btn-sm">
                 <LayoutDashboard size={16} />
@@ -71,74 +63,46 @@ function Landing() {
         </div>
       </nav>
 
-      {/* Hero */}
       <section className="landing-hero">
         <div className="landing-hero-bg" />
         <div className="landing-hero-content">
-          <div className="landing-hero-badge">Sistema de Gestão de Estoque</div>
           <h1 className="landing-hero-title">
-            Gerencie seu estoque<br />
-            <span className="landing-hero-title-accent">com inteligência</span>
+            O controle do seu estoque<br />
+            <span className="landing-hero-title-accent">num lugar só.</span>
           </h1>
           <p className="landing-hero-subtitle">
-            Controle de produtos, movimentações, relatórios e muito mais
-            em uma plataforma moderna e intuitiva.
+            Produtos, movimentações, relatórios — o essencial pro dia a dia
+            do seu almoxarifado.
           </p>
           <div className="landing-hero-actions">
             {user ? (
               <button onClick={() => navigate('/dashboard')} className="landing-btn-primary landing-btn-lg">
                 <LayoutDashboard size={18} />
-                Ir para o Dashboard
+                Ir pro Dashboard
                 <ChevronRight size={16} />
               </button>
             ) : (
               <>
                 <button onClick={() => navigate('/login')} className="landing-btn-primary landing-btn-lg">
-                  Começar Agora
+                  Usar o UpStock
                   <ArrowRight size={16} />
                 </button>
                 <button onClick={() => scrollTo('features')} className="landing-btn-ghost landing-btn-lg">
-                  Saiba Mais
+                  Ver como funciona
                 </button>
               </>
             )}
           </div>
-
-          {/* Mockup cards */}
-          <div className="landing-mockup">
-            <div className="landing-mockup-card landing-mockup-card-1">
-              <div className="landing-mockup-dot" style={{ background: 'var(--green-color4)' }} />
-              <div className="landing-mockup-dot" style={{ background: 'var(--blue-color3)' }} />
-              <div className="landing-mockup-dot" style={{ background: 'var(--yellow-color2)' }} />
-            </div>
-            <div className="landing-mockup-card landing-mockup-card-2">
-              <div className="landing-mockup-bar" style={{ width: '70%', background: 'var(--blue-color3)' }} />
-              <div className="landing-mockup-bar" style={{ width: '45%', background: 'var(--green-color4)' }} />
-              <div className="landing-mockup-bar" style={{ width: '55%', background: 'var(--yellow-color2)' }} />
-              <div className="landing-mockup-bar" style={{ width: '30%', background: 'var(--red-color4)' }} />
-            </div>
-            <div className="landing-mockup-card landing-mockup-card-3">
-              <div className="landing-mockup-row">
-                <div className="landing-mockup-avatar" />
-                <div className="landing-mockup-line" style={{ width: '60%' }} />
-              </div>
-              <div className="landing-mockup-row">
-                <div className="landing-mockup-avatar" />
-                <div className="landing-mockup-line" style={{ width: '40%' }} />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Features */}
       <section id="features" className="landing-section">
         <div className="landing-section-inner">
           <div className="landing-section-header">
-            <span className="landing-section-tag">Funcionalidades</span>
-            <h2 className="landing-section-title">Tudo que você precisa para gerenciar seu estoque</h2>
+            <span className="landing-section-tag">O que tem no sistema</span>
+            <h2 className="landing-section-title">Seis módulos direto ao ponto</h2>
             <p className="landing-section-desc">
-              Ferramentas completas para controle, monitoramento e otimização do seu inventário.
+              Cada tela resolve um problema real de quem gerencia estoque todo dia.
             </p>
           </div>
           <div className="landing-features-grid">
@@ -158,45 +122,56 @@ function Landing() {
         </div>
       </section>
 
-      {/* Benefits */}
-      <section id="benefits" className="landing-section landing-section-alt">
+      <section id="forwhom" className="landing-section landing-section-alt">
         <div className="landing-section-inner">
           <div className="landing-section-header">
-            <span className="landing-section-tag">Por que UpStock?</span>
-            <h2 className="landing-section-title">Feito para simplificar sua operação</h2>
+            <span className="landing-section-tag">Pra quem é</span>
+            <h2 className="landing-section-title">Feito pra quem vive o estoque</h2>
             <p className="landing-section-desc">
-              Três pilares que fazem a diferença no dia a dia da sua gestão.
+              Não importa o tamanho — se tem produto saindo e entrando, o UpStock organiza.
             </p>
           </div>
           <div className="landing-benefits-grid">
-            {benefits.map((ben, i) => (
-              <div key={i} className="landing-benefit-card">
-                <div className="landing-benefit-number">0{i + 1}</div>
-                <h3 className="landing-benefit-title">{ben.title}</h3>
-                <p className="landing-benefit-desc">{ben.desc}</p>
-              </div>
-            ))}
+            <div className="landing-benefit-card">
+              <Users size={32} style={{ color: 'var(--blue-color3)' }} />
+              <h3 className="landing-benefit-title">Donos de negócio</h3>
+              <p className="landing-benefit-desc">
+                Visão clara do que tem no estoque sem precisar planilha.
+              </p>
+            </div>
+            <div className="landing-benefit-card">
+              <Package size={32} style={{ color: 'var(--green-color4)' }} />
+              <h3 className="landing-benefit-title">Almoxarifes</h3>
+              <p className="landing-benefit-desc">
+                Registro rápido de entrada e saída direto do celular ou desktop.
+              </p>
+            </div>
+            <div className="landing-benefit-card">
+              <BarChart3 size={32} style={{ color: 'var(--yellow-color2)' }} />
+              <h3 className="landing-benefit-title">Administradores</h3>
+              <p className="landing-benefit-desc">
+                Controle de usuários, permissões e relatórios completos.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
       <section id="cta" className="landing-section">
         <div className="landing-section-inner">
           <div className="landing-cta-card">
-            <h2 className="landing-cta-title">Pronto para transformar sua gestão de estoque?</h2>
+            <h2 className="landing-cta-title">Vamos nessa.</h2>
             <p className="landing-cta-desc">
-              Comece agora e descubra como o UpStock pode ajudar seu negócio a crescer.
+              Cria sua conta e começa a usar o UpStock agora.
             </p>
             <button onClick={() => navigate('/login')} className="landing-btn-primary landing-btn-lg">
-              {user ? 'Acessar o Sistema' : 'Começar Agora — é Grátis'}
+              {user ? 'Acessar o Sistema' : 'Criar Conta'}
               <ArrowRight size={16} />
             </button>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="landing-footer">
         <div className="landing-footer-inner">
           <div className="landing-footer-brand">
