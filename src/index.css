@@ -2248,9 +2248,15 @@
   letter-spacing: -0.02em;
 }
 
-.landing-footer-copy {
+.landing-footer-copy,
+.landing-footer-dev {
   font-size: 0.8125rem;
   color: var(--text-secondary-color);
+}
+
+.landing-footer-dev strong {
+  color: var(--blue-color3);
+  font-weight: 700;
 }
 
 /* Animations */

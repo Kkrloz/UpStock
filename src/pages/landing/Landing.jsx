@@ -204,6 +204,7 @@ function Landing() {
             <span className="landing-footer-name">UpStock</span>
           </div>
           <p className="landing-footer-copy">© {new Date().getFullYear()} UpStock. Todos os direitos reservados.</p>
+          <p className="landing-footer-dev">Desenvolvido por <strong>CL System&apos;s</strong></p>
         </div>
       </footer>
     </div>
