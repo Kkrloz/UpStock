@@ -84,7 +84,7 @@ function Landing() {
             ) : (
               <>
                 <button onClick={() => navigate('/login')} className="landing-btn-primary landing-btn-lg">
-                  Usar o UpStock
+                  Faça seu login
                   <ArrowRight size={16} />
                 </button>
                 <button onClick={() => scrollTo('features')} className="landing-btn-ghost landing-btn-lg">
@@ -160,14 +160,14 @@ function Landing() {
       <section id="cta" className="landing-section">
         <div className="landing-section-inner">
           <div className="landing-cta-card">
-            <h2 className="landing-cta-title">Vamos nessa.</h2>
+            <h2 className="landing-cta-title">Solicite seu login</h2>
             <p className="landing-cta-desc">
-              Cria sua conta e começa a usar o UpStock agora.
+              Entre em contato para criar seu acesso ao UpStock.
             </p>
-            <button onClick={() => navigate('/login')} className="landing-btn-primary landing-btn-lg">
-              {user ? 'Acessar o Sistema' : 'Criar Conta'}
+            <a href="https://wa.me/558999417503" target="_blank" rel="noopener noreferrer" className="landing-btn-primary landing-btn-lg" style={{ textDecoration: 'none' }}>
+              (89) 994-17503
               <ArrowRight size={16} />
-            </button>
+            </a>
           </div>
         </div>
       </section>
