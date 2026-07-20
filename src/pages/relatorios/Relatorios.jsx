@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package, DollarSign, TrendingUp, AlertTriangle, Download, Store, FileText } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,7 +24,8 @@ function exportCsv(data, filename) {
 }
 
 function Relatorios() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
+  const { t, i18n } = useTranslation();
   const [summary, setSummary] = useState(null);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +43,7 @@ function Relatorios() {
       })
       .catch((err) => {
         if (err.code !== 'ERR_CANCELED') {
-          setError('Erro ao carregar relatórios.');
+          setError(t('reports.errorLoad'));
           console.error(err);
         }
       })
@@ -50,16 +52,16 @@ function Relatorios() {
   }, []);
 
   const formatCurrency = (v) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+    new Intl.NumberFormat(i18n.language || 'pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
   const handleExportInventory = () => {
     if (!inventory.length) return;
     const data = inventory.map((item) => ({
-      Produto: item.productName,
-      Preco: item.price,
-      Quantidade: item.quantity,
-      'Valor Total': item.totalValue,
-      Loja: item.storeName || (item.userEmail ? 'Sem estabelecimento' : ''),
+      [t('reports.tableProduct')]: item.productName,
+      [t('reports.tablePrice')]: item.price,
+      [t('reports.tableStock')]: item.quantity,
+      [t('reports.tableTotal')]: item.totalValue,
+      [t('products.tableStore')]: item.storeName || (item.userEmail ? t('products.noStore') : ''),
     }));
     exportCsv(data, 'inventario');
   };
@@ -67,28 +69,28 @@ function Relatorios() {
   const summaryCards = summary
     ? [
         {
-          label: 'Total de Produtos',
+          label: t('reports.tableProduct') + 's',
           value: summary.totalProducts,
           icon: Package,
           color: 'text-(--blue-color3)',
           bg: 'bg-blue-500/10',
         },
         {
-          label: 'Valor em Estoque',
+          label: t('reports.tableTotal'),
           value: formatCurrency(summary.totalValue),
           icon: DollarSign,
           color: 'text-(--green-color4)',
           bg: 'bg-emerald-500/10',
         },
         {
-          label: 'Mov. no Mês',
+          label: t('movements.title'),
           value: summary.movementsThisMonth,
           icon: TrendingUp,
           color: 'text-(--purple-color2)',
           bg: 'bg-purple-500/10',
         },
         {
-          label: 'Estoque Baixo',
+          label: t('products.lowStock'),
           value: summary.lowStockCount,
           icon: AlertTriangle,
           color: 'text-(--yellow-color2)',
@@ -101,9 +103,9 @@ function Relatorios() {
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">Relatórios</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">{t('reports.title')}</h1>
           <p className="text-sm sm:text-base text-(--text-secondary-color)">
-            Resumo e inventário completo do estoque.
+            {t('reports.subtitle')}
           </p>
         </div>
       </div>
@@ -159,38 +161,38 @@ function Relatorios() {
 
       <div className="bg-(--bg-card-color) border border-(--border-color) rounded-xl sm:rounded-2xl shadow-lg overflow-hidden">
         <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-(--border-color)">
-          <h2 className="text-sm font-bold text-(--text-primary-color) flex items-center gap-2">
-            <FileText size={16} className="text-(--blue-color3)" />
-            Inventário de Produtos
-          </h2>
-          <button
-            type="button"
-            onClick={handleExportInventory}
-            disabled={!inventory.length}
-            className="flex items-center gap-1.5 bg-(--blue-color3) hover:bg-(--blue-color2) disabled:opacity-50 disabled:pointer-events-none text-white font-bold py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all cursor-pointer"
-          >
-            <Download size={14} />
-            <span className="hidden xs:inline">Exportar CSV</span>
-            <span className="xs:hidden">CSV</span>
-          </button>
-        </div>
+            <h2 className="text-sm font-bold text-(--text-primary-color) flex items-center gap-2">
+              <FileText size={16} className="text-(--blue-color3)" />
+              {t('reports.subtitle')}
+            </h2>
+            <button
+              type="button"
+              onClick={handleExportInventory}
+              disabled={!inventory.length}
+              className="flex items-center gap-1.5 bg-(--blue-color3) hover:bg-(--blue-color2) disabled:opacity-50 disabled:pointer-events-none text-white font-bold py-2 px-3 sm:px-4 rounded-xl text-xs sm:text-sm transition-all cursor-pointer"
+            >
+              <Download size={14} />
+              <span className="hidden xs:inline">{t('reports.exportCSV')}</span>
+              <span className="xs:hidden">CSV</span>
+            </button>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-(--border-color) bg-(--bg-subtle) text-xs font-semibold text-(--text-secondary-color) uppercase tracking-wider">
-                <th className="py-3.5 px-4 sm:px-5">Produto</th>
-                <th className="py-3.5 px-4 sm:px-5">Preço</th>
-                <th className="py-3.5 px-4 sm:px-5">Qtd</th>
-                <th className="py-3.5 px-4 sm:px-5">Valor Total</th>
-                {isAdmin && <th className="py-3.5 px-4 sm:px-5">Loja</th>}
-              </tr>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-(--border-color) bg-(--bg-subtle) text-xs font-semibold text-(--text-secondary-color) uppercase tracking-wider">
+                  <th className="py-3.5 px-4 sm:px-5">{t('reports.tableProduct')}</th>
+                  <th className="py-3.5 px-4 sm:px-5">{t('reports.tablePrice')}</th>
+                  <th className="py-3.5 px-4 sm:px-5">{t('reports.tableStock')}</th>
+                  <th className="py-3.5 px-4 sm:px-5">{t('reports.tableTotal')}</th>
+                  {isAdmin && <th className="py-3.5 px-4 sm:px-5">{t('products.tableStore')}</th>}
+                </tr>
             </thead>
             <tbody className="divide-y divide-(--border-color) text-sm">
               {inventory.length === 0 && (
                 <tr>
                   <td colSpan={isAdmin ? 5 : 4} className="py-12 text-center text-(--text-secondary-color)">
-                    Nenhum produto cadastrado.
+                    {t('reports.noData')}
                   </td>
                 </tr>
               )}
@@ -220,10 +222,10 @@ function Relatorios() {
                         </span>
                       ) : item.userEmail ? (
                         <span
-                          title={`Email da loja: ${item.userEmail}`}
+                          title={`${t('users.tableEmail')}: ${item.userEmail}`}
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-(--yellow-color2) border border-amber-500/20"
                         >
-                          Sem estabelecimento
+                          {t('products.noStore')}
                         </span>
                       ) : null}
                     </td>

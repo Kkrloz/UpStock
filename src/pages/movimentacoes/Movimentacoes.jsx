@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowUpRight, ArrowDownRight, Search, Filter, Plus, X, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSse } from '../../hooks/useSse';
 
 const DATE_RANGES = [
-  { label: 'Todas as datas', days: null },
-  { label: 'Hoje', days: 0 },
-  { label: 'Esta Semana', days: 7 },
-  { label: 'Este Mês', days: 30 },
-  { label: 'Este Ano', days: 365 },
+  { labelKey: 'movements.allDates', days: null },
+  { labelKey: 'movements.today', days: 0 },
+  { labelKey: 'movements.thisWeek', days: 7 },
+  { labelKey: 'movements.thisMonth', days: 30 },
+  { labelKey: 'movements.thisYear', days: 365 },
 ];
 
 function toISODate(daysAgo) {
@@ -31,6 +32,7 @@ function toISODateEnd(daysAgo) {
 }
 
 function Movimentacoes() {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [transactions, setTransactions] = useState([]);
   const [products, setProducts] = useState([]);
@@ -112,12 +114,12 @@ function Movimentacoes() {
   });
 
   const formatDateTime = (ts) =>
-    new Date(ts).toLocaleString('pt-BR', {
+    new Date(ts).toLocaleString(i18n.language || 'pt-BR', {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
 
-  const typeLabel = (type) => (type === 'ENTRADA' ? 'Entrada' : 'Saída');
+  const typeLabel = (type) => (type === 'ENTRADA' ? t('movements.entry') : t('movements.exit'));
 
   const openCreate = useCallback(() => {
     setFormData({ productId: '', productName: '', type: 'ENTRADA', quantity: '', userName: user?.name || '' });
@@ -140,16 +142,16 @@ function Movimentacoes() {
     setFormError('');
 
     if (!formData.productId) {
-      setFormError('Selecione um produto.');
+      setFormError(t('movements.errorSelectProduct'));
       return;
     }
     const qty = parseInt(formData.quantity, 10);
     if (isNaN(qty) || qty <= 0) {
-      setFormError('Informe uma quantidade válida.');
+      setFormError(t('movements.errorInvalidQuantity'));
       return;
     }
     if (!formData.userName.trim()) {
-      setFormError('Informe o nome do operador.');
+      setFormError(t('movements.errorOperatorRequired'));
       return;
     }
 
@@ -165,7 +167,7 @@ function Movimentacoes() {
       setShowModal(false);
       reloadWithFilters();
     } catch (err) {
-      setFormError(err.response?.data?.message || 'Erro ao registrar movimentação.');
+      setFormError(err.response?.data?.message || t('movements.errorSave'));
     } finally {
       setSaving(false);
     }
@@ -215,15 +217,15 @@ function Movimentacoes() {
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">Movimentações</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">{t('movements.title')}</h1>
           <p className="text-sm sm:text-base text-(--text-secondary-color)">
-            Histórico completo de entradas e saídas do estoque.
+            {t('movements.subtitle')}
           </p>
         </div>
         <button type="button" onClick={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
           <Plus size={18} className="sm:size-5 transition-transform duration-200 group-hover:rotate-90" />
-          <span className="hidden xs:inline">Registrar Movimentação</span>
-          <span className="xs:hidden">Registrar</span>
+          <span className="hidden xs:inline">{t('movements.registerMovement')}</span>
+          <span className="xs:hidden">{t('movements.registerShort')}</span>
         </button>
       </div>
 
@@ -232,7 +234,7 @@ function Movimentacoes() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" size={18} />
           <input
             type="text"
-            placeholder="Pesquisar por produto..."
+            placeholder={t('movements.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-(--bg-card-hover-color) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-gray-500 text-sm"
@@ -245,7 +247,7 @@ function Movimentacoes() {
             className="flex items-center justify-center gap-2 border border-(--border-color) hover:bg-(--bg-card-hover-color) text-(--text-primary-color) font-semibold py-2 px-4 rounded-xl text-sm transition-all w-full sm:w-auto cursor-pointer"
           >
             <Filter size={16} />
-            {typeFilter === 'todos' ? 'Tipo' : typeLabel(typeFilter)}
+            {typeFilter === 'todos' ? t('movements.filterType') : typeLabel(typeFilter)}
           </button>
           {showFilterMenu && (
             <div className="absolute top-full right-0 mt-1 bg-(--bg-card-color) border border-(--border-color) rounded-xl shadow-2xl z-10 min-w-[160px] overflow-hidden">
@@ -260,7 +262,7 @@ function Movimentacoes() {
                       : 'text-(--text-primary-color) hover:bg-(--bg-card-hover-color)'
                   }`}
                 >
-                  {opt === 'todos' ? 'Todos' : typeLabel(opt)}
+                  {opt === 'todos' ? t('movements.allTypes') : typeLabel(opt)}
                 </button>
               ))}
             </div>
@@ -272,7 +274,7 @@ function Movimentacoes() {
             className={`flex items-center justify-center gap-2 border ${dateRangeIndex > 0 ? 'border-(--blue-border-soft) bg-(--active-bg) text-(--badge-admin-text)' : 'border-(--border-color) text-(--text-primary-color)'} hover:bg-(--bg-card-hover-color) font-semibold py-2 px-4 rounded-xl text-sm transition-all w-full sm:w-auto cursor-pointer`}
           >
             <Filter size={16} />
-            {DATE_RANGES[dateRangeIndex].label}
+            {t(DATE_RANGES[dateRangeIndex].labelKey)}
           </button>
           {showDateMenu && (
             <div className="absolute top-full right-0 mt-1 bg-(--bg-card-color) border border-(--border-color) rounded-xl shadow-2xl z-10 min-w-[160px] overflow-hidden" style={{ right: 0 }}>
@@ -287,7 +289,7 @@ function Movimentacoes() {
                       : 'text-(--text-primary-color) hover:bg-(--bg-card-hover-color)'
                   }`}
                 >
-                  {r.label}
+                  {t(r.labelKey)}
                 </button>
               ))}
             </div>
@@ -300,12 +302,12 @@ function Movimentacoes() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-(--border-color) text-xs font-semibold text-(--text-secondary-color) uppercase">
-                <th className="py-3 px-4">Direção</th>
-                <th className="py-3 px-4">Produto</th>
-                <th className="py-3 px-4">Quantidade</th>
-                <th className="py-3 px-4">Data/Hora</th>
-                <th className="py-3 px-4">Usuário</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="py-3 px-4">{t('movements.tableDirection')}</th>
+                <th className="py-3 px-4">{t('movements.tableProduct')}</th>
+                <th className="py-3 px-4">{t('movements.tableQuantity')}</th>
+                <th className="py-3 px-4">{t('movements.tableDateTime')}</th>
+                <th className="py-3 px-4">{t('movements.tableUser')}</th>
+                <th className="py-3 px-4">{t('movements.tableStatus')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-(--border-color) text-sm text-(--text-primary-color)">
@@ -314,7 +316,7 @@ function Movimentacoes() {
                   <td colSpan="6" className="py-12 text-center text-(--text-secondary-color)">
                     <div className="flex items-center justify-center gap-3">
                       <div className="w-5 h-5 border-2 border-(--spinner-track) border-t-(--blue-color3) rounded-full animate-spin" />
-                      <span>Carregando movimentações...</span>
+                      <span>{t('movements.loading')}</span>
                     </div>
                   </td>
                 </tr>
@@ -322,33 +324,33 @@ function Movimentacoes() {
                 <tr>
                   <td colSpan="6" className="py-12 text-center text-(--text-secondary-color)">
                     {search || typeFilter !== 'todos' || dateRangeIndex > 0
-                      ? 'Nenhuma movimentação encontrada para esta busca.'
-                      : 'Nenhuma movimentação registrada.'}
+                      ? t('movements.noResults')
+                      : t('movements.noMovements')}
                   </td>
                 </tr>
               )}
-              {transactions.map((t) => {
-                const IsInput = t.type === 'ENTRADA';
+              {transactions.map((mov) => {
+                const IsInput = mov.type === 'ENTRADA';
                 const Icon = IsInput ? ArrowUpRight : ArrowDownRight;
                 return (
-                  <tr key={t.id} className="hover:bg-(--bg-card-hover-color) transition-colors">
+                  <tr key={mov.id} className="hover:bg-(--bg-card-hover-color) transition-colors">
                     <td className="py-3.5 px-4 font-semibold">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold ${
                         IsInput ? 'bg-emerald-500/10 text-(--green-color4)' : 'bg-rose-500/10 text-(--red-color4)'
                       }`}>
                         <Icon size={14} />
-                        {typeLabel(t.type)}
+                        {typeLabel(mov.type)}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-(--text-primary-color) font-medium">{t.productName}</td>
+                    <td className="py-3.5 px-4 text-(--text-primary-color) font-medium">{mov.productName}</td>
                     <td className={`py-3.5 px-4 font-bold ${IsInput ? 'text-(--green-color4)' : 'text-(--red-color4)'}`}>
-                      {IsInput ? `+${t.quantity}` : `-${t.quantity}`}
+                      {IsInput ? `+${mov.quantity}` : `-${mov.quantity}`}
                     </td>
-                    <td className="py-3.5 px-4 text-(--text-secondary-color)">{formatDateTime(t.timestamp)}</td>
-                    <td className="py-3.5 px-4 text-(--text-secondary-color)">{t.userName}</td>
+                    <td className="py-3.5 px-4 text-(--text-secondary-color)">{formatDateTime(mov.timestamp)}</td>
+                    <td className="py-3.5 px-4 text-(--text-secondary-color)">{mov.userName}</td>
                     <td className="py-3.5 px-4">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-(--blue-color3)">
-                        {t.status}
+                        {mov.status}
                       </span>
                     </td>
                   </tr>
@@ -398,7 +400,7 @@ function Movimentacoes() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowModal(false)}>
           <div className="bg-(--bg-card-color) border border-(--border-color) rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg sm:text-xl font-bold text-(--text-primary-color)">Registrar Movimentação</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-(--text-primary-color)">{t('movements.modalTitle')}</h2>
               <button type="button" onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer">
                 <X size={18} />
               </button>
@@ -413,22 +415,22 @@ function Movimentacoes() {
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Produto *</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('movements.labelProduct')}</label>
                 <select
                   value={formData.productId}
                   onChange={handleProductChange}
                   className="w-full px-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) focus:outline-none focus:border-(--input-border-focus) text-sm"
                   required
                 >
-                  <option value="">Selecione um produto</option>
+                  <option value="">{t('movements.placeholderProduct')}</option>
                   {products.map((p) => (
-                    <option key={p.id} value={p.id}>{p.name} — {p.quantity} em estoque</option>
+                    <option key={p.id} value={p.id}>{t('movements.optionInStock', { name: p.name, qty: p.quantity })}</option>
                   ))}
                 </select>
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Tipo *</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('movements.labelType')}</label>
                 <div className="flex gap-3">
                   {['ENTRADA', 'SAIDA'].map((opt) => (
                     <label
@@ -457,11 +459,11 @@ function Movimentacoes() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Quantidade *</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('movements.labelQuantity')}</label>
                 <input
                   type="number"
                   min="1"
-                  placeholder="0"
+                  placeholder={t('movements.placeholderQuantity')}
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   className="w-full px-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) text-sm"
@@ -470,10 +472,10 @@ function Movimentacoes() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Operador *</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('movements.labelOperator')}</label>
                 <input
                   type="text"
-                  placeholder="Nome do operador"
+                  placeholder={t('movements.placeholderOperator')}
                   value={formData.userName}
                   onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   className="w-full px-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) text-sm"
@@ -487,7 +489,7 @@ function Movimentacoes() {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -499,7 +501,7 @@ function Movimentacoes() {
                   ) : (
                     <Plus size={15} />
                   )}
-                  {saving ? 'Registrando...' : 'Registrar'}
+                  {saving ? t('movements.saving') : t('movements.register')}
                 </button>
               </div>
             </form>

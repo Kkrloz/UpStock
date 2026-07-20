@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Package, ArrowUpRight, ArrowDownRight, AlertTriangle, Activity, DollarSign } from 'lucide-react';
 import api from '../../services/api';
 
 function Dashboard() {
+  const { t, i18n } = useTranslation();
   const [products, setProducts] = useState([]);
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,11 +26,12 @@ function Dashboard() {
     return () => abort.abort();
   }, []);
 
+  const locale = i18n.language || 'pt-BR';
   const formatCurrency = (value) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    new Intl.NumberFormat(locale, { style: 'currency', currency: 'BRL' }).format(value);
 
   const formatDateTime = (ts) =>
-    new Date(ts).toLocaleString('pt-BR', {
+    new Date(ts).toLocaleString(locale, {
       day: '2-digit', month: '2-digit', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
@@ -49,35 +52,38 @@ function Dashboard() {
 
   const recentMovements = movements.slice(0, 5);
 
+  const entriesQty = todayEntries.reduce((s, m) => s + m.quantity, 0);
+  const exitsQty = todayExits.reduce((s, m) => s + m.quantity, 0);
+
   const stats = [
     {
-      label: 'Produtos Cadastrados',
+      label: t('dashboard.statProducts'),
       value: totalProducts.toString(),
-      change: `${totalProducts} produto(s) no catálogo`,
+      change: t('dashboard.statProductsChange', { count: totalProducts }),
       isPositive: true,
       icon: Package,
       color: 'var(--blue-color3)',
     },
     {
-      label: 'Entradas (Hoje)',
+      label: t('dashboard.statEntries'),
       value: todayEntries.length.toString(),
-      change: `${todayEntries.reduce((s, m) => s + m.quantity, 0)} unidades`,
+      change: t('dashboard.statEntriesChange', { count: entriesQty }),
       isPositive: true,
       icon: ArrowUpRight,
       color: 'var(--green-color4)',
     },
     {
-      label: 'Saídas (Hoje)',
+      label: t('dashboard.statExits'),
       value: todayExits.length.toString(),
-      change: `${todayExits.reduce((s, m) => s + m.quantity, 0)} unidades`,
+      change: t('dashboard.statExitsChange', { count: exitsQty }),
       isPositive: false,
       icon: ArrowDownRight,
       color: 'var(--red-color4)',
     },
     {
-      label: 'Alertas de Estoque',
+      label: t('dashboard.statAlerts'),
       value: lowStockProducts.length.toString(),
-      change: 'Itens com estoque baixo',
+      change: t('dashboard.statAlertsChange'),
       isPositive: false,
       icon: AlertTriangle,
       color: 'var(--yellow-color2)',
@@ -87,9 +93,9 @@ function Dashboard() {
   return (
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">Visão Geral</h1>
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">{t('dashboard.title')}</h1>
         <p className="text-sm sm:text-base text-(--text-secondary-color)">
-          Bem-vindo ao painel de gerenciamento do UpStock. Aqui está o resumo das operações de hoje.
+          {t('dashboard.subtitle')}
         </p>
       </div>
 
@@ -145,25 +151,25 @@ function Dashboard() {
           <div className="flex justify-between items-center">
             <h2 className="text-lg sm:text-xl font-bold text-(--text-primary-color) flex items-center gap-2">
               <Activity size={18} className="sm:size-5 text-(--blue-color3)" />
-              Últimas Movimentações
+              {t('dashboard.recentMovements')}
             </h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-(--border-color) text-xs font-semibold text-(--text-secondary-color) uppercase">
-                  <th className="py-3 px-4">Tipo</th>
-                  <th className="py-3 px-4">Produto</th>
-                  <th className="py-3 px-4">Qtd.</th>
-                  <th className="py-3 px-4">Data</th>
-                  <th className="py-3 px-4">Operador</th>
+                  <th className="py-3 px-4">{t('dashboard.tableType')}</th>
+                  <th className="py-3 px-4">{t('dashboard.tableProduct')}</th>
+                  <th className="py-3 px-4">{t('dashboard.tableQty')}</th>
+                  <th className="py-3 px-4">{t('dashboard.tableDate')}</th>
+                  <th className="py-3 px-4">{t('dashboard.tableOperator')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-(--border-color) text-sm text-(--text-primary-color)">
                 {recentMovements.length === 0 && (
                   <tr>
                     <td colSpan="5" className="py-8 text-center text-(--text-secondary-color)">
-                      Nenhuma movimentação recente.
+                      {t('dashboard.noRecentMovements')}
                     </td>
                   </tr>
                 )}
@@ -177,7 +183,7 @@ function Dashboard() {
                             : 'bg-rose-500/10 text-(--red-color4)'
                         }`}
                       >
-                        {move.type === 'ENTRADA' ? 'Entrada' : 'Saída'}
+                        {move.type === 'ENTRADA' ? t('dashboard.entry') : t('dashboard.exit')}
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-(--text-primary-color) font-medium">{move.productName}</td>
@@ -197,14 +203,14 @@ function Dashboard() {
           <div className="bg-(--bg-card-color) border border-(--border-color) rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
             <h2 className="text-lg sm:text-xl font-bold text-(--text-primary-color) flex items-center gap-2">
               <DollarSign size={18} className="sm:size-5 text-(--green-color4)" />
-              Valor Total do Estoque
+              {t('dashboard.totalStockValue')}
             </h2>
             <div className="flex flex-col gap-1 py-2">
               <span className="text-2xl sm:text-4xl font-extrabold text-(--text-primary-color)">
                 {formatCurrency(totalStockValue)}
               </span>
               <span className="text-xs text-(--green-color4) flex items-center gap-1 font-medium">
-                Valor estimado dos produtos armazenados
+                {t('dashboard.totalStockValueDesc')}
               </span>
             </div>
           </div>
@@ -213,14 +219,14 @@ function Dashboard() {
             <div className="bg-(--bg-card-color) border border-(--border-color) rounded-2xl p-6 flex flex-col gap-4 shadow-lg">
               <h2 className="text-base sm:text-lg font-bold text-(--text-primary-color) flex items-center gap-2">
                 <AlertTriangle size={18} className="text-(--yellow-color2)" />
-                Ações Recomendadas
+                {t('dashboard.recommendedActions')}
               </h2>
               <div className="flex flex-col gap-3">
                 {lowStockProducts.slice(0, 3).map((p) => (
                   <div key={p.id} className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-xl flex flex-col gap-1">
-                    <span className="text-xs font-bold text-(--yellow-color2)">Estoque Baixo: {p.name}</span>
+                    <span className="text-xs font-bold text-(--yellow-color2)">{t('dashboard.lowStockTitle', { name: p.name })}</span>
                     <span className="text-xs text-(--text-secondary-color)">
-                      Restam apenas {p.quantity} unidade(s) no almoxarifado principal.
+                      {t('dashboard.lowStockDesc', { qty: p.quantity })}
                     </span>
                   </div>
                 ))}

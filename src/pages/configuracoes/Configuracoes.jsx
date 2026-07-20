@@ -6,12 +6,13 @@ import {
   Sun, Moon, Languages, BellOff, BellRing, Check, X,
   Upload, RefreshCw, Store
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getInitials, getAvatarColor } from '../../utils/avatar';
 import api from '../../services/api';
 
-function passwordStrength(pwd) {
+function passwordStrength(pwd, t) {
   if (!pwd) return { score: 0, label: '', color: '' };
   let score = 0;
   if (pwd.length >= 8)  score++;
@@ -19,11 +20,11 @@ function passwordStrength(pwd) {
   if (/[0-9]/.test(pwd)) score++;
   if (/[^A-Za-z0-9]/.test(pwd)) score++;
   const map = [
-    { label: 'Muito fraca', color: 'var(--red-color4)' },
-    { label: 'Fraca',       color: 'var(--yellow-color2)' },
-    { label: 'Média',       color: 'var(--yellow-color2)' },
-    { label: 'Forte',       color: 'var(--green-color4)' },
-    { label: 'Muito forte', color: 'var(--green-color4)' },
+    { label: t('settings.security.strengthVeryWeak'), color: 'var(--red-color4)' },
+    { label: t('settings.security.strengthWeak'),     color: 'var(--yellow-color2)' },
+    { label: t('settings.security.strengthMedium'),   color: 'var(--yellow-color2)' },
+    { label: t('settings.security.strengthStrong'),   color: 'var(--green-color4)' },
+    { label: t('settings.security.strengthVeryStrong'), color: 'var(--green-color4)' },
   ];
   return { score, ...map[score] };
 }
@@ -85,7 +86,8 @@ function PasswordInput({ id, value, onChange, placeholder }) {
 }
 
 function StrengthBar({ pwd }) {
-  const { score, label, color } = passwordStrength(pwd);
+  const { t } = useTranslation();
+  const { score, label, color } = passwordStrength(pwd, t);
   if (!pwd) return null;
   return (
     <div className="cfg-strength">
@@ -121,6 +123,7 @@ function SectionCard({ title, description, children }) {
 }
 
 function TabPerfil({ user }) {
+  const { t } = useTranslation();
   const [name, setName]         = useState(user?.name || '');
   const [email, setEmail]       = useState(user?.email || '');
   const [storeName, setStoreName] = useState(user?.storeName || '');
@@ -146,13 +149,13 @@ function TabPerfil({ user }) {
 
   const handleSave = async e => {
     e.preventDefault();
-    if (!name.trim()) { setFeedback({ type: 'error', msg: 'O nome não pode ficar em branco.' }); return; }
+    if (!name.trim()) { setFeedback({ type: 'error', msg: t('settings.profile.errorNameRequired') }); return; }
     setSaving(true); setFeedback(null);
     try {
       await api.put('/users/me', { name, email, cargo: user?.cargo || '', storeName });
-      setFeedback({ type: 'success', msg: 'Perfil atualizado com sucesso.' });
+      setFeedback({ type: 'success', msg: t('settings.profile.saveSuccess') });
     } catch (err) {
-      setFeedback({ type: 'error', msg: err.response?.data?.message || 'Erro ao salvar perfil.' });
+      setFeedback({ type: 'error', msg: err.response?.data?.message || t('settings.profile.saveError') });
     } finally {
       setSaving(false);
     }
@@ -166,7 +169,7 @@ function TabPerfil({ user }) {
     <form onSubmit={handleSave} className="cfg-tab-body">
       <FeedbackBanner type={feedback?.type} message={feedback?.msg} onClose={() => setFeedback(null)} />
 
-      <SectionCard title="Foto de Perfil" description="Formatos aceitos: JPG, PNG, WEBP. Tamanho máximo: 2 MB.">
+      <SectionCard title={t('settings.profile.sectionTitle')} description={t('settings.profile.sectionDesc')}>
         <div className="cfg-avatar-row">
           <div className="cfg-avatar-wrap">
             {displaySrc
@@ -175,7 +178,7 @@ function TabPerfil({ user }) {
                   <span>{initials}</span>
                 </div>
             }
-            <button type="button" onClick={() => fileRef.current?.click()} className="cfg-avatar-camera" title="Alterar foto">
+            <button type="button" onClick={() => fileRef.current?.click()} className="cfg-avatar-camera" title={t('common.edit')}>
               <Camera size={14} />
             </button>
           </div>
@@ -190,55 +193,52 @@ function TabPerfil({ user }) {
               role="button"
               tabIndex={0}
               onKeyDown={e => e.key === 'Enter' && fileRef.current?.click()}
-              aria-label="Área de upload de foto"
+              aria-label={t('common.edit')}
             >
               <Upload size={18} className="cfg-dropzone-icon" />
               <span className="cfg-dropzone-text">
-                <strong>Clique para enviar</strong> ou arraste aqui
+                <strong>{t('common.edit')}</strong>
               </span>
-              <span className="cfg-dropzone-sub">PNG, JPG, WEBP até 2 MB</span>
             </div>
             <input ref={fileRef} type="file" accept="image/*" onChange={onFileChange} className="hidden" />
 
             {displaySrc && (
               <button type="button" onClick={removePhoto} className="cfg-remove-photo-btn">
                 <Trash2 size={13} />
-                Remover foto
+                {t('common.delete')}
               </button>
             )}
           </div>
         </div>
-      </SectionCard>
 
-      <SectionCard title="Dados Pessoais">
         <div className="cfg-grid-2">
           <div className="cfg-field">
-            <FieldLabel>Nome completo</FieldLabel>
-            <CfgInput id="cfg-name" value={name} onChange={e => setName(e.target.value)} placeholder="Seu nome" />
+            <FieldLabel>{t('settings.profile.nameLabel')}</FieldLabel>
+            <CfgInput id="cfg-name" value={name} onChange={e => setName(e.target.value)} placeholder={t('settings.profile.namePlaceholder')} />
           </div>
           <div className="cfg-field">
-            <FieldLabel>E-mail</FieldLabel>
-            <CfgInput id="cfg-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" />
+            <FieldLabel>{t('settings.profile.emailLabel')}</FieldLabel>
+            <CfgInput id="cfg-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t('settings.profile.emailPlaceholder')} />
           </div>
           <div className="cfg-field">
-            <FieldLabel>Estabelecimento</FieldLabel>
+            <FieldLabel>{t('settings.profile.storeLabel')}</FieldLabel>
             <div className="relative">
               <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
-              <CfgInput id="cfg-store" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Nome da sua loja" style={{ paddingLeft: '2.25rem' }} />
+              <CfgInput id="cfg-store" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder={t('settings.profile.storePlaceholder')} style={{ paddingLeft: '2.25rem' }} />
             </div>
           </div>
           <div className="cfg-field">
-            <FieldLabel hint="Somente leitura">Cargo</FieldLabel>
-            <CfgInput id="cfg-cargo" value={user?.cargo || 'Colaborador'} readOnly />
+            <FieldLabel hint={t('common.description')}>{t('settings.profile.roleLabel')}</FieldLabel>
+            <CfgInput id="cfg-cargo" value={user?.cargo || t('settings.profile.rolePlaceholder')} readOnly />
           </div>
         </div>
         <div className="cfg-field" style={{ marginTop: '12px' }}>
-          <FieldLabel hint={`${bio.length}/160`}>Sobre mim</FieldLabel>
+          <FieldLabel hint={`${bio.length}/160`}>{t('settings.profile.bioLabel')}</FieldLabel>
           <textarea
             id="cfg-bio"
             value={bio}
             onChange={e => bio.length < 160 || e.target.value.length < bio.length ? setBio(e.target.value) : null}
-            placeholder="Uma breve descrição sobre você..."
+            placeholder={t('settings.profile.bioPlaceholder')}
             className="cfg-textarea"
             rows={3}
           />
@@ -247,7 +247,7 @@ function TabPerfil({ user }) {
 
       <div className="cfg-form-footer">
         <button type="submit" disabled={saving} className="cfg-btn-primary">
-          {saving ? <><div className="cfg-btn-spinner"/><span>Salvando…</span></> : <><Save size={15}/><span>Salvar Perfil</span></>}
+          {saving ? <><div className="cfg-btn-spinner"/><span>{t('common.saving')}</span></> : <><Save size={15}/><span>{t('common.save')}</span></>}
         </button>
       </div>
     </form>
@@ -255,21 +255,22 @@ function TabPerfil({ user }) {
 }
 
 function TabSeguranca({ user }) {
+  const { t } = useTranslation();
   const [curr, setCurr]     = useState('');
   const [next, setNext]     = useState('');
   const [confirm, setConf]  = useState('');
   const [saving, setSaving] = useState(false);
   const [feedback, setFb]   = useState(null);
 
-  const strength = passwordStrength(next);
+  const strength = passwordStrength(next, t);
   const mismatch = confirm && next && next !== confirm;
   const match    = confirm && next && next === confirm;
 
   const handlePassword = async e => {
     e.preventDefault();
-    if (!curr || !next || !confirm) { setFb({ type:'error', msg:'Preencha todos os campos.' }); return; }
-    if (next !== confirm)           { setFb({ type:'error', msg:'As senhas não coincidem.' }); return; }
-    if (strength.score < 2)        { setFb({ type:'error', msg:'Escolha uma senha mais forte.' }); return; }
+    if (!curr || !next || !confirm) { setFb({ type:'error', msg: t('settings.security.errorFields') }); return; }
+    if (next !== confirm)           { setFb({ type:'error', msg: t('settings.security.errorMismatch') }); return; }
+    if (strength.score < 2)        { setFb({ type:'error', msg: t('settings.security.errorWeakPassword') }); return; }
     setSaving(true); setFb(null);
     try {
       await api.post('/auth/change-password', {
@@ -278,13 +279,13 @@ function TabSeguranca({ user }) {
         confirmPassword: confirm,
       });
       setCurr(''); setNext(''); setConf('');
-      setFb({ type:'success', msg:'Senha alterada com sucesso.' });
+      setFb({ type:'success', msg: t('settings.security.saveSuccess') });
     } catch (err) {
       const status = err.response?.status;
       if (status === 401) {
-        setFb({ type:'error', msg:'Senha atual incorreta.' });
+        setFb({ type:'error', msg: t('settings.security.errorCurrentPassword') });
       } else {
-        setFb({ type:'error', msg: err.response?.data?.message || 'Erro ao alterar senha.' });
+        setFb({ type:'error', msg: err.response?.data?.message || t('settings.security.saveError') });
       }
     } finally {
       setSaving(false);
@@ -295,22 +296,22 @@ function TabSeguranca({ user }) {
     <div className="cfg-tab-body">
       <FeedbackBanner type={feedback?.type} message={feedback?.msg} onClose={() => setFb(null)} />
 
-      <SectionCard title="Alterar Senha" description="Use uma senha forte com letras, números e símbolos.">
+      <SectionCard title={t('settings.security.sectionTitle')} description={t('settings.security.sectionDesc')}>
         <form onSubmit={handlePassword} className="cfg-pw-form">
           <div className="cfg-field">
-            <FieldLabel>Senha atual</FieldLabel>
+            <FieldLabel>{t('settings.security.currentPasswordLabel')}</FieldLabel>
             <PasswordInput id="cfg-curr-pw" value={curr} onChange={e => setCurr(e.target.value)} placeholder="••••••••" />
           </div>
           <div className="cfg-field">
-            <FieldLabel>Nova senha</FieldLabel>
-            <PasswordInput id="cfg-new-pw" value={next} onChange={e => setNext(e.target.value)} placeholder="Mínimo 8 caracteres" />
+            <FieldLabel>{t('settings.security.newPasswordLabel')}</FieldLabel>
+            <PasswordInput id="cfg-new-pw" value={next} onChange={e => setNext(e.target.value)} placeholder={t('settings.security.newPasswordPlaceholder')} />
             <StrengthBar pwd={next} />
             <ul className="cfg-pw-rules">
               {[
-                [next.length >= 8,     '8 ou mais caracteres'],
-                [/[A-Z]/.test(next),   'Letra maiúscula'],
-                [/[0-9]/.test(next),   'Número'],
-                [/[^A-Za-z0-9]/.test(next), 'Símbolo especial'],
+                [next.length >= 8,     t('settings.security.ruleLength')],
+                [/[A-Z]/.test(next),   t('settings.security.ruleUppercase')],
+                [/[0-9]/.test(next),   t('settings.security.ruleNumber')],
+                [/[^A-Za-z0-9]/.test(next), t('settings.security.ruleSymbol')],
               ].map(([ok, label]) => (
                 <li key={label} className={`cfg-pw-rule${ok ? ' cfg-pw-rule-ok' : ''}`}>
                   {ok ? <Check size={11}/> : <X size={11}/>}
@@ -320,16 +321,16 @@ function TabSeguranca({ user }) {
             </ul>
           </div>
           <div className="cfg-field">
-            <FieldLabel>Confirmar nova senha</FieldLabel>
+            <FieldLabel>{t('settings.security.confirmPasswordLabel')}</FieldLabel>
             <div className="cfg-pw-wrapper">
-              <PasswordInput id="cfg-conf-pw" value={confirm} onChange={e => setConf(e.target.value)} placeholder="Repita a nova senha" />
+              <PasswordInput id="cfg-conf-pw" value={confirm} onChange={e => setConf(e.target.value)} placeholder={t('settings.security.confirmPasswordPlaceholder')} />
             </div>
-            {mismatch && <p className="cfg-field-err"><AlertCircle size={12}/>As senhas não coincidem</p>}
-            {match    && <p className="cfg-field-ok"><CheckCircle2 size={12}/>Senhas conferem</p>}
+            {mismatch && <p className="cfg-field-err"><AlertCircle size={12}/>{t('settings.security.errorMismatch')}</p>}
+            {match    && <p className="cfg-field-ok"><CheckCircle2 size={12}/>{t('settings.security.saveSuccess')}</p>}
           </div>
           <div className="cfg-form-footer cfg-form-footer-inline">
             <button type="submit" disabled={saving || mismatch} className="cfg-btn-primary">
-              {saving ? <><div className="cfg-btn-spinner"/><span>Alterando…</span></> : <><Lock size={14}/><span>Alterar Senha</span></>}
+              {saving ? <><div className="cfg-btn-spinner"/><span>{t('common.saving')}</span></> : <><Lock size={14}/><span>{t('settings.security.saveButton')}</span></>}
             </button>
           </div>
         </form>
@@ -339,8 +340,8 @@ function TabSeguranca({ user }) {
 }
 
 function TabPreferencias() {
+  const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
-  const [language,   setLang]     = useState('pt-BR');
   const [timezone,   setTZ]       = useState('America/Sao_Paulo');
   const [notifApp,   setNApp]     = useState(true);
   const [notifEmail, setNEmail]   = useState(true);
@@ -354,19 +355,19 @@ function TabPreferencias() {
     setSaving(true); setFb(null);
     await new Promise(r => setTimeout(r, 800));
     setSaving(false);
-    setFb({ type: 'success', msg: 'Preferências salvas com sucesso.' });
+    setFb({ type: 'success', msg: t('settings.preferences.saveSuccess') });
   };
 
   return (
     <form onSubmit={handleSave} className="cfg-tab-body">
       <FeedbackBanner type={feedback?.type} message={feedback?.msg} onClose={() => setFb(null)} />
 
-      <SectionCard title="Aparência" description="Escolha o tema visual do sistema.">
+      <SectionCard title={t('settings.preferences.themeLabel')} description={t('settings.preferences.sectionDesc')}>
         <div className="cfg-theme-opts">
           {[
-            { val: 'dark',  Icon: Moon,    label: 'Escuro' },
-            { val: 'light', Icon: Sun,     label: 'Claro' },
-            { val: 'auto',  Icon: Monitor, label: 'Sistema' },
+            { val: 'dark',  Icon: Moon,    label: t('settings.preferences.themeDark') },
+            { val: 'light', Icon: Sun,     label: t('settings.preferences.themeLight') },
+            { val: 'auto',  Icon: Monitor, label: t('settings.preferences.themeSystem') },
           ].map(({ val, Icon, label }) => (
             <button
               key={val}
@@ -382,14 +383,14 @@ function TabPreferencias() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Idioma & Fuso Horário">
+      <SectionCard title={t('settings.preferences.languageLabel')}>
         <div className="cfg-grid-2">
           <div className="cfg-field">
-            <FieldLabel><Languages size={13}/> Idioma</FieldLabel>
-            <select value={language} onChange={e => setLang(e.target.value)} className="cfg-select">
-              <option value="pt-BR">Português (Brasil)</option>
-              <option value="en-US">English (US)</option>
-              <option value="es-ES">Español</option>
+            <FieldLabel><Languages size={13}/> {t('settings.preferences.languageLabel')}</FieldLabel>
+            <select value={i18n.language} onChange={e => i18n.changeLanguage(e.target.value)} className="cfg-select">
+              <option value="pt">{t('settings.preferences.langPtBr')}</option>
+              <option value="en">{t('settings.preferences.langEnUs')}</option>
+              <option value="es">{t('settings.preferences.langEs')}</option>
             </select>
           </div>
           <div className="cfg-field">
@@ -411,12 +412,12 @@ function TabPreferencias() {
         </div>
       </SectionCard>
 
-      <SectionCard title="Notificações" description="Controle como e quando você é notificado.">
+      <SectionCard title={t('settings.preferences.notificationsSection')} description={t('settings.preferences.notificationsDesc')}>
         <div className="cfg-toggle-list">
           {[
-            { id:'notif-app',   Icon: Bell,           label: 'Notificações no sistema',  sub: 'Alertas de estoque, movimentações e relatórios.', val: notifApp,   set: setNApp   },
-            { id:'notif-email', Icon: Mail,           label: 'Notificações por e-mail',  sub: 'Resumos diários e alertas críticos.',             val: notifEmail, set: setNEmail },
-            { id:'notif-sms',   Icon: MessageSquare,  label: 'Notificações por SMS',     sub: 'Somente alertas de segurança e urgência.',         val: notifSMS,   set: setNSMS   },
+            { id:'notif-app',   Icon: Bell,           label: t('settings.preferences.notifSystem'),  sub: t('settings.preferences.notifSystemDesc'), val: notifApp,   set: setNApp   },
+            { id:'notif-email', Icon: Mail,           label: t('settings.preferences.notifEmail'),  sub: t('settings.preferences.notifEmailDesc'),   val: notifEmail, set: setNEmail },
+            { id:'notif-sms',   Icon: MessageSquare,  label: t('settings.preferences.notifSms'),    sub: t('settings.preferences.notifSmsDesc'),     val: notifSMS,   set: setNSMS   },
           ].map(({ id, Icon, label, sub, val, set }) => (
             <div key={id} className="cfg-toggle-row">
               <div className="cfg-toggle-icon"><Icon size={16}/></div>
@@ -433,8 +434,8 @@ function TabPreferencias() {
       <div className="cfg-form-footer">
         <button type="submit" disabled={saving} className="cfg-btn-primary">
           {saving
-            ? <><div className="cfg-btn-spinner"/><span>Salvando…</span></>
-            : <><Save size={15}/><span>Salvar Preferências</span></>
+            ? <><div className="cfg-btn-spinner"/><span>{t('common.saving')}</span></>
+            : <><Save size={15}/><span>{t('settings.preferences.saveButton')}</span></>
           }
         </button>
       </div>
@@ -442,33 +443,34 @@ function TabPreferencias() {
   );
 }
 
-const TABS = [
-  { id: 'perfil',       label: 'Perfil',               Icon: User    },
-  { id: 'seguranca',    label: 'Segurança & Acesso',    Icon: Shield  },
-  { id: 'preferencias', label: 'Preferências Gerais',   Icon: Settings },
-];
-
 function Configuracoes() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('perfil');
+
+  const TABS = [
+    { id: 'perfil',       label: t('settings.tabs.profile'),       Icon: User    },
+    { id: 'seguranca',    label: t('settings.tabs.security'),      Icon: Shield  },
+    { id: 'preferencias', label: t('settings.tabs.preferences'),   Icon: Settings },
+  ];
 
   return (
     <div className="cfg-page">
       <div className="cfg-page-header">
         <div>
-          <h1 className="cfg-page-title">Configurações</h1>
-          <p className="cfg-page-subtitle">Gerencie seu perfil, segurança e preferências do sistema.</p>
+          <h1 className="cfg-page-title">{t('settings.title')}</h1>
+          <p className="cfg-page-subtitle">{t('settings.subtitle')}</p>
         </div>
       </div>
 
       <div className="cfg-layout">
-        <nav className="cfg-nav" aria-label="Seções de configurações">
+        <nav className="cfg-nav" aria-label={t('settings.title')}>
           <div className="cfg-nav-profile">
             <div className="cfg-nav-avatar" style={{ backgroundColor: getAvatarColor(user?.name || '') }}>
               <span>{getInitials(user?.name || '')}</span>
             </div>
             <div className="cfg-nav-profile-info">
-              <p className="cfg-nav-profile-name">{user?.name || 'Usuário'}</p>
+              <p className="cfg-nav-profile-name">{user?.name || t('common.user')}</p>
               <p className="cfg-nav-profile-email">{user?.email || ''}</p>
             </div>
           </div>

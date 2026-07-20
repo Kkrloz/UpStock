@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import {
   Users, UserPlus, Trash2, Shield, UserCircle,
   Mail, Lock, User, Briefcase, AlertCircle,
@@ -8,6 +9,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 
 function Usuarios() {
+  const { t } = useTranslation();
   const { user: currentUser, createUser, updateUser, deleteUser, listUsers } = useAuth();
 
   const [users, setUsers] = useState([]);
@@ -99,11 +101,11 @@ function Usuarios() {
     setFormSuccess('');
 
     if (!formData.name || !formData.email) {
-      setFormError('Preencha nome e e-mail.');
+      setFormError(t('users.errorNameEmailRequired'));
       return;
     }
     if (!editingUser && formData.password.length < 6) {
-      setFormError('A senha deve ter pelo menos 6 caracteres.');
+      setFormError(t('users.errorPasswordLength'));
       return;
     }
 
@@ -113,10 +115,10 @@ function Usuarios() {
         const payload = { name: formData.name, email: formData.email, cargo: formData.cargo, role: formData.role, storeName: formData.storeName };
         if (formData.password) payload.password = formData.password;
         await updateUser(editingUser.id, payload);
-        setFormSuccess(`Usuário "${formData.name}" atualizado com sucesso!`);
+        setFormSuccess(t('users.updateSuccess'));
       } else {
         await createUser(formData);
-        setFormSuccess(`Usuário "${formData.name}" criado com sucesso!`);
+        setFormSuccess(t('users.createSuccess'));
       }
       setFormData({ name: '', email: '', password: '', cargo: '', role: 'user', storeName: '' });
       await fetchUsers({ search: search || undefined, role: roleFilter });
@@ -124,21 +126,21 @@ function Usuarios() {
         handleCloseForm();
       }, 1800);
     } catch (err) {
-      setFormError(err.message || (editingUser ? 'Erro ao atualizar usuário.' : 'Erro ao criar usuário.'));
+      setFormError(err.message || (editingUser ? t('users.errorUpdate') : t('users.errorCreate')));
     } finally {
       setFormLoading(false);
     }
   };
 
   const handleDeleteUser = async (userId, userName) => {
-    if (!window.confirm(`Deseja realmente remover o usuário "${userName}"?`)) return;
+    if (!window.confirm(t('users.modalDeleteConfirm', { name: userName }))) return;
     setDeletingId(userId);
     setDeleteError('');
     try {
       await deleteUser(userId);
       await fetchUsers({ search: search || undefined, role: roleFilter });
     } catch (err) {
-      setDeleteError(err.message || 'Erro ao remover usuário.');
+      setDeleteError(err.message || t('users.errorDelete'));
     } finally {
       setDeletingId(null);
     }
@@ -153,10 +155,10 @@ function Usuarios() {
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-(--text-primary-color) tracking-tight flex items-center gap-2">
             <Users size={20} className="sm:size-6 text-(--blue-color3)" />
-            Gerenciamento de Usuários
+            {t('users.title')}
           </h1>
           <p className="text-sm text-(--text-secondary-color) mt-1">
-            Cadastre e gerencie as contas de acesso ao UpStock
+            {t('users.subtitle')}
           </p>
         </div>
         <button
@@ -165,7 +167,7 @@ function Usuarios() {
           className="flex items-center gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-md cursor-pointer"
         >
           <UserPlus size={16} />
-          Novo Usuário
+          {t('users.newUser')}
         </button>
       </div>
 
@@ -211,7 +213,7 @@ function Usuarios() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" size={18} />
           <input
             type="text"
-            placeholder="Buscar por nome ou e-mail..."
+            placeholder={t('users.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-(--bg-subtle) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--placeholder) focus:outline-none focus:border-(--input-border-focus) text-sm"
@@ -233,7 +235,7 @@ function Usuarios() {
                   : 'border border-(--border-color) text-(--text-secondary-color) hover:bg-(--bg-card-hover-color)'
               }`}
             >
-              {r === 'todos' ? 'Todos' : r === 'admin' ? 'Admin' : 'Usuário'}
+              {r === 'todos' ? 'Todos' : r === 'admin' ? t('users.roleAdmin') : t('users.roleUser')}
             </button>
           ))}
         </div>
@@ -244,7 +246,7 @@ function Usuarios() {
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-base font-bold text-(--text-primary-color) flex items-center gap-2">
               {editingUser ? <Pencil size={18} className="text-(--yellow-color2)" /> : <UserPlus size={18} className="text-(--blue-color3)" />}
-              {editingUser ? 'Editar Usuário' : 'Novo Usuário'}
+              {editingUser ? t('users.modalEditTitle') : t('users.modalCreateTitle')}
             </h2>
             <button
               onClick={handleCloseForm}
@@ -269,14 +271,14 @@ function Usuarios() {
 
           <form onSubmit={handleCreateUser} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Nome Completo *</label>
+              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('users.labelName')}</label>
               <div className="relative">
                 <User size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
                 <input
                   id="form-user-name"
                   name="name"
                   type="text"
-                  placeholder="Nome do usuário"
+                  placeholder={t('users.placeholderName')}
                   value={formData.name}
                   onChange={handleFormChange}
                   disabled={formLoading}
@@ -287,14 +289,14 @@ function Usuarios() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">E-mail *</label>
-                <div className="relative">
-                  <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
-                  <input
-                    id="form-user-email"
-                    name="email"
-                    type="email"
-                    placeholder="email@exemplo.com"
+              <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('users.labelEmail')}</label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
+                <input
+                  id="form-user-email"
+                  name="email"
+                  type="email"
+                  placeholder={t('users.placeholderEmail')}
                     value={formData.email}
                     onChange={handleFormChange}
                     disabled={formLoading}
@@ -305,14 +307,14 @@ function Usuarios() {
              </div>
 
              <div className="flex flex-col gap-1">
-               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Senha {!editingUser && '*'}</label>
+               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('users.labelPassword')}</label>
                <div className="relative">
                  <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
                  <input
                    id="form-user-password"
                    name="password"
                    type={showPassword ? 'text' : 'password'}
-                   placeholder={editingUser ? 'Deixe em branco para manter' : 'Mínimo 6 caracteres'}
+                   placeholder={editingUser ? 'Deixe em branco para manter' : t('users.placeholderPassword')}
                    value={formData.password}
                    onChange={handleFormChange}
                    disabled={formLoading}
@@ -348,14 +350,14 @@ function Usuarios() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Estabelecimento</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('users.labelStore')}</label>
                 <div className="relative">
                   <Store size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color)" />
                   <input
                     id="form-user-store"
                     name="storeName"
                     type="text"
-                    placeholder="Nome da loja/estabelecimento"
+                    placeholder={t('users.placeholderStore')}
                     value={formData.storeName}
                     onChange={handleFormChange}
                     disabled={formLoading}
@@ -365,7 +367,7 @@ function Usuarios() {
               </div>
 
               <div className="flex flex-col gap-1 sm:col-span-2">
-               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Perfil de Acesso</label>
+               <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('users.labelRole')}</label>
                <div className="flex gap-3">
                  <label className={`flex items-center gap-2.5 flex-1 p-3 rounded-xl border cursor-pointer transition-all ${formData.role === 'user' ? 'border-blue-500/50 bg-blue-500/10' : 'border-(--border-color) bg-(--bg-subtle) hover:bg-(--input-bg)'}`}>
                    <input
@@ -378,7 +380,7 @@ function Usuarios() {
                    />
                    <UserCircle size={18} className={formData.role === 'user' ? 'text-(--blue-color3)' : 'text-(--text-secondary-color)'} />
                    <div>
-                     <p className="text-sm font-bold text-(--text-primary-color)">Loja</p>
+                      <p className="text-sm font-bold text-(--text-primary-color)">{t('users.roleStore')}</p>
                      <p className="text-xs text-(--text-secondary-color)">Acesso próprio — vê apenas seus produtos</p>
                    </div>
                  </label>
@@ -393,7 +395,7 @@ function Usuarios() {
                    />
                    <Shield size={18} className={formData.role === 'admin' ? 'text-(--yellow-color2)' : 'text-(--text-secondary-color)'} />
                    <div>
-                     <p className="text-sm font-bold text-(--text-primary-color)">Administrador</p>
+                      <p className="text-sm font-bold text-(--text-primary-color)">{t('users.roleAdmin')}</p>
                      <p className="text-xs text-(--text-secondary-color)">Acesso total — gerencia todas as lojas</p>
                    </div>
                  </label>
@@ -406,8 +408,8 @@ function Usuarios() {
                  onClick={handleCloseForm}
                  className="px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
                >
-                 Cancelar
-               </button>
+                  {t('common.cancel')}
+                </button>
                <button
                  id="form-user-submit"
                  type="submit"
@@ -421,7 +423,7 @@ function Usuarios() {
                  ) : (
                    <UserPlus size={15} />
                  )}
-                 {formLoading ? (editingUser ? 'Salvando...' : 'Criando...') : editingUser ? 'Salvar Alterações' : 'Criar Usuário'}
+                  {formLoading ? (editingUser ? t('users.saveSaving') : t('users.saveCreating')) : editingUser ? t('users.saveChanges') : t('users.createUser')}
                </button>
              </div>
            </form>
@@ -436,12 +438,12 @@ function Usuarios() {
         {loadingUsers ? (
           <div className="flex items-center justify-center py-16 gap-3">
             <div className="w-6 h-6 border-2 border-(--spinner-track) border-t-(--blue-color3) rounded-full animate-spin" />
-            <span className="text-sm text-(--text-secondary-color)">Carregando usuários...</span>
+            <span className="text-sm text-(--text-secondary-color)">{t('users.loading')}</span>
           </div>
         ) : users.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-2">
             <Users size={36} className="text-(--text-tercery-color)" />
-            <p className="text-sm text-(--text-secondary-color)">Nenhum usuário encontrado.</p>
+            <p className="text-sm text-(--text-secondary-color)">{t('users.noResults')}</p>
           </div>
         ) : (
           <div className="divide-y divide-(--border-color)">
@@ -455,7 +457,7 @@ function Usuarios() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-(--text-primary-color) truncate">{u.name}</p>
                     {u.id === currentUser?.id && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-md bg-(--bg-raised) text-(--text-secondary-color) font-medium">você</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded-md bg-(--bg-raised) text-(--text-secondary-color) font-medium">{t('users.you')}</span>
                     )}
                   </div>
                   <p className="text-xs text-(--text-secondary-color) truncate">{u.email}</p>
@@ -467,12 +469,12 @@ function Usuarios() {
                   {u.role === 'admin' ? (
                     <span className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-yellow-500/10 text-(--yellow-color2) border border-yellow-500/20 font-semibold">
                       <Shield size={11} />
-                      Admin
+                      {t('users.roleAdmin')}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-(--bg-subtle) text-(--text-secondary-color) border border-(--border-color) font-semibold">
                       <UserCircle size={11} />
-                      Usuário
+                      {t('users.roleUser')}
                     </span>
                   )}
                 </div>
@@ -481,7 +483,7 @@ function Usuarios() {
 
                 <button
                   onClick={() => handleEditUser(u)}
-                  title="Editar usuário"
+                  title={t('common.edit')}
                   className="p-2 rounded-lg text-(--text-secondary-color) hover:text-(--yellow-color2) hover:bg-amber-500/10 transition-all cursor-pointer shrink-0"
                 >
                   <Pencil size={15} />
@@ -489,7 +491,7 @@ function Usuarios() {
                 <button
                   onClick={() => handleDeleteUser(u.id, u.name)}
                   disabled={deletingId === u.id || u.id === currentUser?.id}
-                  title={u.id === currentUser?.id ? 'Não é possível remover sua própria conta' : 'Remover usuário'}
+                  title={u.id === currentUser?.id ? t('users.modalCantDeleteSelf') : t('common.delete')}
                   className="p-2 rounded-lg text-(--text-secondary-color) hover:text-(--red-color4) hover:bg-(--danger-bg) transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer shrink-0"
                 >
                   {deletingId === u.id ? (

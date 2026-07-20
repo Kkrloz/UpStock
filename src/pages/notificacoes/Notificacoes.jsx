@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Bell, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import api from '../../services/api';
 
 function Notificacoes() {
+  const { t, i18n } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,9 +22,9 @@ function Notificacoes() {
           list.push({
             id: `low-${p.id}`,
             type: 'alerta',
-            title: 'Estoque Baixo',
-            message: `"${p.name}" está com apenas ${p.quantity} unidade(s) em estoque.`,
-            time: new Date().toLocaleString('pt-BR'),
+            title: t('products.lowStock'),
+            message: t('dashboard.lowStockDesc', { name: p.name, qty: p.quantity }),
+            time: new Date().toLocaleString(i18n.language || 'pt-BR'),
           });
         });
 
@@ -30,9 +32,11 @@ function Notificacoes() {
           list.push({
             id: `mov-${m.id}`,
             type: m.type === 'ENTRADA' ? 'sucesso' : 'info',
-            title: m.type === 'ENTRADA' ? 'Entrada Registrada' : 'Saída Registrada',
-            message: `${m.type === 'ENTRADA' ? 'Entrada' : 'Saída'} de ${m.quantity} unidade(s) de "${m.productName}" — ${m.userName}.`,
-            time: new Date(m.timestamp).toLocaleString('pt-BR'),
+            title: m.type === 'ENTRADA' ? t('dashboard.entry') : t('dashboard.exit'),
+            message: m.type === 'ENTRADA'
+              ? t('notifications.entryNotification', { qty: m.quantity, name: m.productName, user: m.userName })
+              : t('notifications.exitNotification', { qty: m.quantity, name: m.productName, user: m.userName }),
+            time: new Date(m.timestamp).toLocaleString(i18n.language || 'pt-BR'),
           });
         });
 
@@ -56,9 +60,9 @@ function Notificacoes() {
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">Notificações</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">{t('notifications.title')}</h1>
           <p className="text-sm sm:text-base text-(--text-secondary-color)">
-            Acompanhe alertas, avisos e logs do sistema UpStock.
+            {t('notifications.subtitle')}
           </p>
         </div>
       </div>
@@ -67,7 +71,7 @@ function Notificacoes() {
         {notifications.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <Bell size={36} className="text-(--text-tercery-color)" />
-            <p className="text-sm text-(--text-secondary-color)">Nenhuma notificação no momento.</p>
+            <p className="text-sm text-(--text-secondary-color)">{t('notifications.noNotifications')}</p>
           </div>
         )}
         {notifications.map((notif) => {

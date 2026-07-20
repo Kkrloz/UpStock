@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LogOut, Settings, ChevronDown, Shield, UserCircle, Sun, Moon, Menu } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router';
@@ -9,6 +10,7 @@ function TopBar({ onMenuToggle }) {
   const { user, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const { resolvedTheme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const dropdownRef = useRef(null);
@@ -34,12 +36,12 @@ function TopBar({ onMenuToggle }) {
 
   return (
     <header className="topbar-header">
-      <button onClick={onMenuToggle} className="p-2 rounded-xl text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer md:hidden shrink-0" aria-label="Abrir menu">
+      <button onClick={onMenuToggle} className="p-2 rounded-xl text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer md:hidden shrink-0" aria-label={t('nav.openMenu')}>
         <Menu size={20} />
       </button>
 
       <div className="flex items-center gap-1 ml-auto">
-        <button onClick={toggleTheme} className="p-2 rounded-xl text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer" title={resolvedTheme === 'dark' ? 'Mudar para tema claro' : 'Mudar para tema escuro'}>
+        <button onClick={toggleTheme} className="p-2 rounded-xl text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer" title={resolvedTheme === 'dark' ? t('topbar.switchToLight') : t('topbar.switchToDark')}>
           {resolvedTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
         <div className="topbar-profile-wrapper" ref={dropdownRef}>
@@ -48,9 +50,9 @@ function TopBar({ onMenuToggle }) {
               <span className="topbar-avatar-initials">{initials}</span>
             </div>
             <div className="topbar-user-info">
-              <span className="topbar-user-name">{user?.name || 'Usuário'}</span>
+              <span className="topbar-user-name">{user?.name || t('topbar.userLabel')}</span>
               <span className={`topbar-role-badge ${isAdmin ? 'topbar-role-admin' : 'topbar-role-user'}`}>
-                {isAdmin ? <><Shield size={10} /> Admin</> : <><UserCircle size={10} /> Usuário</>}
+                {isAdmin ? <><Shield size={10} /> {t('topbar.roleAdmin')}</> : <><UserCircle size={10} /> {t('topbar.roleUser')}</>}
               </span>
             </div>
             <ChevronDown size={16} className={`topbar-chevron ${dropdownOpen ? 'topbar-chevron-open' : ''}`} />
@@ -70,12 +72,12 @@ function TopBar({ onMenuToggle }) {
               </div>
               <div className="topbar-dropdown-divider" />
               <button className="topbar-dropdown-item" onClick={() => { navigate('/configuracoes'); setDropdownOpen(false); }} role="menuitem">
-                <Settings size={15} /> Configurações
+                <Settings size={15} /> {t('topbar.settings')}
               </button>
               <div className="topbar-dropdown-divider" />
               <button className="topbar-dropdown-item topbar-dropdown-item-danger" onClick={handleLogout} disabled={isLoggingOut} role="menuitem">
                 {isLoggingOut ? <div className="topbar-spinner" /> : <LogOut size={15} />}
-                {isLoggingOut ? 'Saindo...' : 'Sair'}
+                {isLoggingOut ? t('topbar.loggingOut') : t('topbar.logout')}
               </button>
             </div>
           )}

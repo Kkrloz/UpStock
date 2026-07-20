@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { LayoutGrid, Package, Truck, ChartColumnIncreasing, Bell, Settings, LogOut, Users, X } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,6 +12,7 @@ function BarraLateral({ onClose }) {
   const navigate = useNavigate();
   const { isAdmin, logout } = useAuth();
   const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await logout();
@@ -27,31 +29,31 @@ function BarraLateral({ onClose }) {
           <img src={logoSrc} alt="UpStock" className="w-8 h-8 sm:w-10 sm:h-10" />
           <h1 className="text-xl sm:text-2xl font-bold text-(--logo-text-color)">UpStock</h1>
         </div>
-        <button onClick={onClose} className="p-1 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-colors md:hidden cursor-pointer" aria-label="Fechar menu">
+        <button onClick={onClose} className="p-1 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-colors md:hidden cursor-pointer" aria-label={t('nav.closeMenu')}>
           <X size={20} />
         </button>
       </div>
 
       <div className="flex flex-col gap-2 w-full px-4">
-        <TextoBar>Principal</TextoBar>
+        <TextoBar>{t('nav.main')}</TextoBar>
         <div className="flex flex-col gap-1">
-          <MenuButton icon={LayoutGrid} label="Visão geral" to="/" active={currentPath === '/'} onClick={handleNav} />
-          <MenuButton icon={Package} label="Produtos" to="/produtos" active={currentPath === '/produtos'} onClick={handleNav} />
-          <MenuButton icon={Truck} label="Movimentações" to="/movimentacoes" active={currentPath === '/movimentacoes'} onClick={handleNav} />
-          <MenuButton icon={ChartColumnIncreasing} label="Relatórios" to="/relatorios" active={currentPath === '/relatorios'} onClick={handleNav} />
-          <MenuButton icon={Bell} label="Notificações" to="/notificacoes" active={currentPath === '/notificacoes'} onClick={handleNav} />
+          <MenuButton icon={LayoutGrid} label={t('nav.overview')} to="/" active={currentPath === '/'} onClick={handleNav} />
+          <MenuButton icon={Package} label={t('nav.products')} to="/produtos" active={currentPath === '/produtos'} onClick={handleNav} />
+          <MenuButton icon={Truck} label={t('nav.movements')} to="/movimentacoes" active={currentPath === '/movimentacoes'} onClick={handleNav} />
+          <MenuButton icon={ChartColumnIncreasing} label={t('nav.reports')} to="/relatorios" active={currentPath === '/relatorios'} onClick={handleNav} />
+          <MenuButton icon={Bell} label={t('nav.notifications')} to="/notificacoes" active={currentPath === '/notificacoes'} onClick={handleNav} />
         </div>
       </div>
       <div className="flex flex-col gap-2 w-full px-4 pb-4">
-        <TextoBar>Sistema</TextoBar>
+        <TextoBar>{t('nav.system')}</TextoBar>
         <div className="flex flex-col gap-1">
           {isAdmin && (
-            <MenuButton icon={Users} label="Usuários" to="/usuarios" active={currentPath === '/usuarios'} onClick={handleNav} />
+            <MenuButton icon={Users} label={t('nav.users')} to="/usuarios" active={currentPath === '/usuarios'} onClick={handleNav} />
           )}
-          <MenuButton icon={Settings} label="Configurações" to="/configuracoes" active={currentPath === '/configuracoes'} onClick={handleNav} />
+          <MenuButton icon={Settings} label={t('nav.settings')} to="/configuracoes" active={currentPath === '/configuracoes'} onClick={handleNav} />
           <button type="button" onClick={handleLogout} className="flex items-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold text-(--text-secondary-color) hover:text-(--red-color4) hover:bg-(--danger-bg) transition-all cursor-pointer">
             <LogOut size={16} />
-            <span>Sair</span>
+            <span>{t('nav.logout')}</span>
           </button>
         </div>
       </div>

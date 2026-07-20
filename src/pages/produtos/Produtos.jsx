@@ -1,28 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 import { Plus, Search, Filter as FilterIcon, AlertCircle, Edit, Trash2, X, Save, Store, RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSse } from '../../hooks/useSse';
 
-const PRICE_RANGES = [
-  { label: 'Todos os preços', minPrice: null, maxPrice: null },
-  { label: 'Até R$ 50', minPrice: 0, maxPrice: 50 },
-  { label: 'R$ 50 a R$ 100', minPrice: 50, maxPrice: 100 },
-  { label: 'R$ 100 a R$ 500', minPrice: 100, maxPrice: 500 },
-  { label: 'R$ 500 a R$ 1.000', minPrice: 500, maxPrice: 1000 },
-  { label: 'Acima de R$ 1.000', minPrice: 1000, maxPrice: null },
-];
-
-const STOCK_RANGES = [
-  { label: 'Todas as quantidades', minStock: null, maxStock: null },
-  { label: 'Estoque Baixo (≤ 5)', minStock: 0, maxStock: 5 },
-  { label: '6 a 50 unidades', minStock: 6, maxStock: 50 },
-  { label: '51 a 200 unidades', minStock: 51, maxStock: 200 },
-  { label: 'Acima de 200 unidades', minStock: 200, maxStock: null },
-];
-
 function Produtos() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
@@ -47,6 +32,23 @@ function Produtos() {
   const [pendingStockIndex, setPendingStockIndex] = useState(0);
 
   const isAdmin = user?.role === 'admin';
+
+  const PRICE_RANGES = [
+    { label: t('products.allPrices'), minPrice: null, maxPrice: null },
+    { label: t('products.upTo50'), minPrice: 0, maxPrice: 50 },
+    { label: t('products.from50To100'), minPrice: 50, maxPrice: 100 },
+    { label: t('products.from100To500'), minPrice: 100, maxPrice: 500 },
+    { label: t('products.from500To1000'), minPrice: 500, maxPrice: 1000 },
+    { label: t('products.above1000'), minPrice: 1000, maxPrice: null },
+  ];
+
+  const STOCK_RANGES = [
+    { label: t('products.allStock'), minStock: null, maxStock: null },
+    { label: t('products.lowStockFilter'), minStock: 0, maxStock: 5 },
+    { label: t('products.from6To50'), minStock: 6, maxStock: 50 },
+    { label: t('products.from51To200'), minStock: 51, maxStock: 200 },
+    { label: t('products.above200'), minStock: 200, maxStock: null },
+  ];
 
   const currentPrice = PRICE_RANGES[priceRangeIndex];
   const currentStock = STOCK_RANGES[stockRangeIndex];
@@ -154,17 +156,17 @@ function Produtos() {
     setFormError('');
 
     if (!formData.name.trim()) {
-      setFormError('O nome do produto é obrigatório.');
+      setFormError(t('products.errorNameRequired'));
       return;
     }
     const price = parseFloat(formData.price);
     if (isNaN(price) || price < 0) {
-      setFormError('Informe um preço válido.');
+      setFormError(t('products.errorInvalidPrice'));
       return;
     }
     const quantity = parseInt(formData.quantity, 10);
     if (isNaN(quantity) || quantity < 0) {
-      setFormError('Informe uma quantidade válida.');
+      setFormError(t('products.errorInvalidQuantity'));
       return;
     }
 
@@ -186,7 +188,7 @@ function Produtos() {
       setShowModal(false);
       reloadWithFilters();
     } catch (err) {
-      setFormError(err.response?.data?.message || 'Erro ao salvar produto.');
+      setFormError(err.response?.data?.message || t('products.errorSave'));
     } finally {
       setSaving(false);
     }
@@ -254,15 +256,15 @@ function Produtos() {
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">Produtos</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-(--text-primary-color)">{t('products.title')}</h1>
           <p className="text-sm sm:text-base text-(--text-secondary-color)">
-            Gerencie o catálogo de produtos, estoque e valores.
+            {t('products.subtitle')}
           </p>
         </div>
         <button type="button" onClick={openCreate} className="group flex items-center gap-1.5 sm:gap-2 bg-(--blue-color3) hover:bg-(--blue-color2) active:scale-95 text-white font-bold py-2 sm:py-2.5 px-3 sm:px-5 rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200 cursor-pointer text-sm sm:text-base">
           <Plus size={18} className="sm:size-5 transition-transform duration-200 group-hover:rotate-90" />
-          <span className="hidden xs:inline">Adicionar Produto</span>
-          <span className="xs:hidden">Adicionar</span>
+          <span className="hidden xs:inline">{t('products.addProduct')}</span>
+          <span className="xs:hidden">{t('products.addShort')}</span>
         </button>
       </div>
 
@@ -271,7 +273,7 @@ function Produtos() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color) group-focus-within:text-(--blue-color3) transition-colors duration-200" size={18} />
           <input
             type="text"
-            placeholder="Pesquisar produtos..."
+            placeholder={t('products.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-(--bg-subtle) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--placeholder) focus:outline-none focus:border-(--input-border-focus) focus:shadow-(--input-shadow-focus) focus:bg-(--bg-card-hover-color) text-sm transition-all duration-200"
@@ -284,7 +286,7 @@ function Produtos() {
             className={`flex items-center justify-center gap-2 border ${hasFilters ? 'border-(--blue-border-soft) bg-(--active-bg) text-(--badge-admin-text)' : 'border-(--border-color) text-(--text-primary-color)'} hover:border-(--blue-border-soft) hover:bg-(--hover-bg) font-semibold py-2 px-4 rounded-xl text-sm transition-all w-full sm:w-auto cursor-pointer`}
           >
             <FilterIcon size={16} />
-            Filtros
+            {t('products.filters')}
             {hasFilters && (
               <span className="w-2 h-2 rounded-full bg-(--blue-color3) animate-pulse" />
             )}
@@ -293,14 +295,14 @@ function Produtos() {
           {showFilters && (
             <div className="absolute top-full right-0 mt-2 bg-(--bg-card-color) border border-(--border-color) rounded-2xl shadow-2xl z-50 w-72 p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-(--text-primary-color)">Filtrar Produtos</h3>
+                <h3 className="text-sm font-bold text-(--text-primary-color)">{t('products.filterTitle')}</h3>
                 <button type="button" onClick={() => setShowFilters(false)} className="p-1 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer">
                   <X size={16} />
                 </button>
               </div>
 
               <div className="mb-4">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider mb-2 block">Preço</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider mb-2 block">{t('products.filterPrice')}</label>
                 <div className="flex flex-col gap-1">
                   {PRICE_RANGES.map((r, i) => (
                     <button
@@ -320,7 +322,7 @@ function Produtos() {
               </div>
 
               <div className="mb-5">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider mb-2 block">Estoque</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider mb-2 block">{t('products.filterStock')}</label>
                 <div className="flex flex-col gap-1">
                   {STOCK_RANGES.map((r, i) => (
                     <button
@@ -346,14 +348,14 @@ function Produtos() {
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
                 >
                   <RotateCcw size={14} />
-                  Limpar
+                  {t('common.clear')}
                 </button>
                 <button
                   type="button"
                   onClick={applyFilters}
                   className="flex-1 px-3 py-2 bg-(--blue-color3) hover:bg-(--blue-color2) text-white font-bold rounded-xl text-sm transition-all cursor-pointer"
                 >
-                  Aplicar
+                  {t('common.apply')}
                 </button>
               </div>
             </div>
@@ -366,12 +368,12 @@ function Produtos() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-(--border-color) bg-(--bg-subtle) text-xs font-semibold text-(--text-secondary-color) uppercase tracking-wider">
-                {isAdmin && <th className="py-3.5 px-4 sm:px-5">Loja</th>}
-                <th className="py-3.5 px-4 sm:px-5">Nome</th>
-                <th className="py-3.5 px-4 sm:px-5">Preço</th>
-                <th className="py-3.5 px-4 sm:px-5">Estoque</th>
-                <th className="py-3.5 px-4 sm:px-5">Status</th>
-                <th className="py-3.5 px-4 sm:px-5 text-right">Ações</th>
+                {isAdmin && <th className="py-3.5 px-4 sm:px-5">{t('products.tableStore')}</th>}
+                <th className="py-3.5 px-4 sm:px-5">{t('products.tableName')}</th>
+                <th className="py-3.5 px-4 sm:px-5">{t('products.tablePrice')}</th>
+                <th className="py-3.5 px-4 sm:px-5">{t('products.tableStock')}</th>
+                <th className="py-3.5 px-4 sm:px-5">{t('products.tableStatus')}</th>
+                <th className="py-3.5 px-4 sm:px-5 text-right">{t('products.tableActions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-(--border-color) text-sm">
@@ -380,14 +382,14 @@ function Produtos() {
                   <td colSpan={isAdmin ? 6 : 5} className="py-12 text-center text-(--text-secondary-color)">
                     <div className="flex items-center justify-center gap-3">
                       <div className="w-5 h-5 border-2 border-(--spinner-track) border-t-(--blue-color3) rounded-full animate-spin" />
-                      <span>Carregando produtos...</span>
+                      <span>{t('products.loading')}</span>
                     </div>
                   </td>
                 </tr>
               ) : products.length === 0 && (
                 <tr>
                   <td colSpan={isAdmin ? 6 : 5} className="py-12 text-center text-(--text-secondary-color)">
-                    {search || hasFilters ? 'Nenhum produto encontrado para esta busca.' : 'Nenhum produto cadastrado.'}
+                    {search || hasFilters ? t('products.noResults') : t('products.noProducts')}
                   </td>
                 </tr>
               )}
@@ -404,7 +406,7 @@ function Produtos() {
                           </div>
                         ) : (
                           <span title={`Email da loja: ${product.userEmail}`} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-(--yellow-color2) border border-amber-500/20">
-                            Sem estabelecimento
+                            {t('products.noStore')}
                           </span>
                         )}
                       </td>
@@ -427,11 +429,11 @@ function Produtos() {
                       {lowStock ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-(--yellow-color2) border border-amber-500/20">
                           <AlertCircle size={12} />
-                          Estoque Baixo
+                          {t('products.lowStock')}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-(--green-color4) border border-emerald-500/20">
-                          Normal
+                          {t('products.normal')}
                         </span>
                       )}
                     </td>
@@ -493,7 +495,7 @@ function Produtos() {
           <div className="bg-(--bg-card-color) border border-(--border-color) rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg sm:text-xl font-bold text-(--text-primary-color)">
-                {editingProduct ? 'Editar Produto' : 'Adicionar Produto'}
+                {editingProduct ? t('products.modalEditTitle') : t('products.modalAddTitle')}
               </h2>
               <button type="button" onClick={() => setShowModal(false)} className="p-1.5 rounded-lg text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) transition-all cursor-pointer">
                 <X size={18} />
@@ -509,10 +511,10 @@ function Produtos() {
 
             <form onSubmit={handleSave} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Nome *</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('products.labelName')}</label>
                 <input
                   type="text"
-                  placeholder="Nome do produto"
+                  placeholder={t('products.placeholderName')}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) text-sm"
@@ -521,9 +523,9 @@ function Produtos() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Descrição</label>
+                <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('products.labelDescription')}</label>
                 <textarea
-                  placeholder="Descrição do produto (opcional)"
+                  placeholder={t('products.placeholderDescription')}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={2}
@@ -533,13 +535,13 @@ function Produtos() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Preço *</label>
+                  <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('products.labelPrice')}</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary-color) font-semibold text-sm pointer-events-none">R$</span>
                     <input
                       type="text"
                       inputMode="decimal"
-                      placeholder="0,00"
+                      placeholder={t('products.placeholderPrice')}
                       value={formData.price ? formatPriceInput(formData.price) : ''}
                       onChange={(e) => {
                         const raw = e.target.value;
@@ -552,11 +554,11 @@ function Produtos() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">Quantidade *</label>
+                  <label className="text-xs font-bold text-(--text-secondary-color) uppercase tracking-wider">{t('products.labelQuantity')}</label>
                   <input
                     type="number"
                     min="0"
-                    placeholder="0"
+                    placeholder={t('products.placeholderQuantity')}
                     value={formData.quantity}
                     onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                     className="w-full px-3 py-2.5 bg-(--input-bg) border border-(--border-color) rounded-xl text-(--text-primary-color) placeholder-(--text-secondary-color) focus:outline-none focus:border-(--input-border-focus) text-sm"
@@ -571,7 +573,7 @@ function Produtos() {
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -583,7 +585,7 @@ function Produtos() {
                   ) : (
                     <Save size={15} />
                   )}
-                  {saving ? 'Salvando...' : editingProduct ? 'Salvar Alterações' : 'Adicionar'}
+                  {saving ? t('products.saving') : editingProduct ? t('products.saveChanges') : t('products.add')}
                 </button>
               </div>
             </form>
@@ -599,9 +601,9 @@ function Produtos() {
                 <Trash2 size={24} className="text-(--red-color4)" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-(--text-primary-color)">Excluir Produto</h2>
+                <h2 className="text-lg font-bold text-(--text-primary-color)">{t('products.modalDeleteTitle')}</h2>
                 <p className="text-sm text-(--text-secondary-color) mt-1">
-                  Tem certeza que deseja remover <strong>{deleteTarget.name}</strong>?
+                  <Trans i18nKey="products.modalDeleteConfirm" values={{ name: deleteTarget.name }} />
                 </p>
               </div>
               <div className="flex gap-3 w-full pt-2">
@@ -611,7 +613,7 @@ function Produtos() {
                   disabled={deleting}
                   className="flex-1 px-4 py-2.5 rounded-xl border border-(--border-color) text-(--text-secondary-color) hover:text-(--text-primary-color) hover:bg-(--bg-card-hover-color) text-sm font-medium transition-all cursor-pointer"
                 >
-                  Cancelar
+                  {t('common.cancel')}
                 </button>
                 <button
                   type="button"
@@ -624,7 +626,7 @@ function Produtos() {
                   ) : (
                     <Trash2 size={15} />
                   )}
-                  {deleting ? 'Excluindo...' : 'Excluir'}
+                  {deleting ? t('products.deleting') : t('common.delete')}
                 </button>
               </div>
             </div>

@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import './index.css'
+import './i18n/index.js'
 import App from './App.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 

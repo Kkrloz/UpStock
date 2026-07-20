@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { useTranslation, Trans } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   Package, ArrowRight, ArrowUpDown, BarChart3, Bell, Users, Settings,
@@ -7,17 +8,18 @@ import {
 } from 'lucide-react';
 
 const features = [
-  { icon: Package, title: 'Produtos', desc: 'Cadastro, busca e controle de quantidade.', color: 'var(--blue-color3)' },
-  { icon: ArrowUpDown, title: 'Movimentações', desc: 'Entradas e saídas com histórico completo.', color: 'var(--green-color4)' },
-  { icon: BarChart3, title: 'Relatórios', desc: 'Dados do estoque organizados pra consulta.', color: 'var(--yellow-color2)' },
-  { icon: Bell, title: 'Notificações', desc: 'Alerta quando o estoque de um produto está baixo.', color: 'var(--red-color4)' },
-  { icon: Users, title: 'Usuários', desc: 'Admin, operador e visualizador — cada um com seu acesso.', color: 'var(--blue-color3)' },
-  { icon: Settings, title: 'Configurações', desc: 'Tema escuro/claro, perfil e preferências.', color: 'var(--green-color4)' },
+  { icon: Package, titleKey: 'landing.featuresProductsTitle', descKey: 'landing.featuresProductsDesc', color: 'var(--blue-color3)' },
+  { icon: ArrowUpDown, titleKey: 'landing.featuresMovementsTitle', descKey: 'landing.featuresMovementsDesc', color: 'var(--green-color4)' },
+  { icon: BarChart3, titleKey: 'landing.featuresReportsTitle', descKey: 'landing.featuresReportsDesc', color: 'var(--yellow-color2)' },
+  { icon: Bell, titleKey: 'landing.featuresNotificationsTitle', descKey: 'landing.featuresNotificationsDesc', color: 'var(--red-color4)' },
+  { icon: Users, titleKey: 'landing.featuresUsersTitle', descKey: 'landing.featuresUsersDesc', color: 'var(--blue-color3)' },
+  { icon: Settings, titleKey: 'landing.featuresSettingsTitle', descKey: 'landing.featuresSettingsDesc', color: 'var(--green-color4)' },
 ];
 
 function Landing() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -42,17 +44,17 @@ function Landing() {
           </div>
 
           <div className={`landing-nav-links ${menuOpen ? 'landing-nav-links-open' : ''}`}>
-            <button onClick={() => scrollTo('features')} className="landing-nav-link">Funcionalidades</button>
-            <button onClick={() => scrollTo('forwhom')} className="landing-nav-link">Pra quem é</button>
+            <button onClick={() => scrollTo('features')} className="landing-nav-link">{t('landing.navFeatures')}</button>
+            <button onClick={() => scrollTo('forwhom')} className="landing-nav-link">{t('landing.navForWhom')}</button>
             {user ? (
               <button onClick={() => navigate('/dashboard')} className="landing-btn-primary landing-btn-sm">
                 <LayoutDashboard size={16} />
-                Dashboard
+                {t('landing.navDashboard')}
               </button>
             ) : (
               <button onClick={() => navigate('/login')} className="landing-btn-primary landing-btn-sm">
                 <LogIn size={16} />
-                Entrar
+                {t('landing.navLogin')}
               </button>
             )}
           </div>
@@ -67,28 +69,27 @@ function Landing() {
         <div className="landing-hero-bg" />
         <div className="landing-hero-content">
           <h1 className="landing-hero-title">
-            O controle do seu estoque<br />
-            <span className="landing-hero-title-accent">num lugar só.</span>
+            {t('landing.heroTitle')}<br />
+            <span className="landing-hero-title-accent">{t('landing.heroTitleAccent')}</span>
           </h1>
           <p className="landing-hero-subtitle">
-            Produtos, movimentações, relatórios — o essencial pro dia a dia
-            do seu almoxarifado.
+            {t('landing.heroSubtitle')}
           </p>
           <div className="landing-hero-actions">
             {user ? (
               <button onClick={() => navigate('/dashboard')} className="landing-btn-primary landing-btn-lg">
                 <LayoutDashboard size={18} />
-                Ir pro Dashboard
+                {t('landing.heroGoToDashboard')}
                 <ChevronRight size={16} />
               </button>
             ) : (
               <>
                 <button onClick={() => navigate('/login')} className="landing-btn-primary landing-btn-lg">
-                  Faça seu login
+                  {t('landing.heroLogin')}
                   <ArrowRight size={16} />
                 </button>
                 <button onClick={() => scrollTo('features')} className="landing-btn-ghost landing-btn-lg">
-                  Ver como funciona
+                  {t('landing.heroSeeHow')}
                 </button>
               </>
             )}
@@ -99,10 +100,10 @@ function Landing() {
       <section id="features" className="landing-section">
         <div className="landing-section-inner">
           <div className="landing-section-header">
-            <span className="landing-section-tag">O que tem no sistema</span>
-            <h2 className="landing-section-title">Seis módulos direto ao ponto</h2>
+            <span className="landing-section-tag">{t('landing.featuresTag')}</span>
+            <h2 className="landing-section-title">{t('landing.featuresTitle')}</h2>
             <p className="landing-section-desc">
-              Cada tela resolve um problema real de quem gerencia estoque todo dia.
+              {t('landing.featuresDesc')}
             </p>
           </div>
           <div className="landing-features-grid">
@@ -113,8 +114,8 @@ function Landing() {
                   <div className="landing-feat-icon" style={{ background: `${feat.color}18`, color: feat.color }}>
                     <Icon size={22} />
                   </div>
-                  <h3 className="landing-feat-title">{feat.title}</h3>
-                  <p className="landing-feat-desc">{feat.desc}</p>
+                  <h3 className="landing-feat-title">{t(feat.titleKey)}</h3>
+                  <p className="landing-feat-desc">{t(feat.descKey)}</p>
                 </div>
               );
             })}
@@ -125,32 +126,32 @@ function Landing() {
       <section id="forwhom" className="landing-section landing-section-alt">
         <div className="landing-section-inner">
           <div className="landing-section-header">
-            <span className="landing-section-tag">Pra quem é</span>
-            <h2 className="landing-section-title">Feito pra quem vive o estoque</h2>
+            <span className="landing-section-tag">{t('landing.forWhomTag')}</span>
+            <h2 className="landing-section-title">{t('landing.forWhomTitle')}</h2>
             <p className="landing-section-desc">
-              Não importa o tamanho — se tem produto saindo e entrando, o UpStock organiza.
+              {t('landing.forWhomDesc')}
             </p>
           </div>
           <div className="landing-benefits-grid">
             <div className="landing-benefit-card">
               <Users size={32} style={{ color: 'var(--blue-color3)' }} />
-              <h3 className="landing-benefit-title">Donos de negócio</h3>
+              <h3 className="landing-benefit-title">{t('landing.forWhomOwnersTitle')}</h3>
               <p className="landing-benefit-desc">
-                Visão clara do que tem no estoque sem precisar planilha.
+                {t('landing.forWhomOwnersDesc')}
               </p>
             </div>
             <div className="landing-benefit-card">
               <Package size={32} style={{ color: 'var(--green-color4)' }} />
-              <h3 className="landing-benefit-title">Almoxarifes</h3>
+              <h3 className="landing-benefit-title">{t('landing.forWhomStockistsTitle')}</h3>
               <p className="landing-benefit-desc">
-                Registro rápido de entrada e saída direto do celular ou desktop.
+                {t('landing.forWhomStockistsDesc')}
               </p>
             </div>
             <div className="landing-benefit-card">
               <BarChart3 size={32} style={{ color: 'var(--yellow-color2)' }} />
-              <h3 className="landing-benefit-title">Administradores</h3>
+              <h3 className="landing-benefit-title">{t('landing.forWhomAdminsTitle')}</h3>
               <p className="landing-benefit-desc">
-                Controle de usuários, permissões e relatórios completos.
+                {t('landing.forWhomAdminsDesc')}
               </p>
             </div>
           </div>
@@ -160,12 +161,12 @@ function Landing() {
       <section id="cta" className="landing-section">
         <div className="landing-section-inner">
           <div className="landing-cta-card">
-            <h2 className="landing-cta-title">Solicite seu login</h2>
+            <h2 className="landing-cta-title">{t('landing.ctaTitle')}</h2>
             <p className="landing-cta-desc">
-              Entre em contato para criar seu acesso ao UpStock.
+              {t('landing.ctaDesc')}
             </p>
             <a href="https://wa.me/5589994017503" target="_blank" rel="noopener noreferrer" className="landing-btn-primary landing-btn-lg" style={{ textDecoration: 'none' }}>
-              (89) 99401-7503
+              {t('landing.ctaPhone')}
               <ArrowRight size={16} />
             </a>
           </div>
@@ -178,8 +179,8 @@ function Landing() {
             <img src="/UpStock.svg" alt="UpStock" className="landing-footer-logo" />
             <span className="landing-footer-name">UpStock</span>
           </div>
-          <p className="landing-footer-copy">© {new Date().getFullYear()} UpStock. Todos os direitos reservados.</p>
-          <p className="landing-footer-dev">Desenvolvido por <strong>CL System&apos;s</strong></p>
+          <p className="landing-footer-copy">{t('landing.footerCopyright', { year: new Date().getFullYear() })}</p>
+          <p className="landing-footer-dev"><Trans i18nKey="landing.footerDev" /></p>
         </div>
       </footer>
     </div>
