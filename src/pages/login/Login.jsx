@@ -23,7 +23,7 @@ function Login() {
     setIsLoading(true);
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Credenciais inválidas. Tente novamente.');
     } finally {

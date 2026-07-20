@@ -4,6 +4,7 @@ import ProtectedRoute from '../components/layout/ProtectedRoute.jsx';
 import PublicRoute from '../components/layout/PublicRoute.jsx';
 import AdminRoute from '../components/layout/AdminRoute.jsx';
 
+import Landing from '../pages/landing/Landing.jsx';
 import Dashboard from '../pages/dashboard/Dashboard.jsx';
 import Produtos from '../pages/produtos/Produtos.jsx';
 import Movimentacoes from '../pages/movimentacoes/Movimentacoes.jsx';
@@ -16,13 +17,15 @@ import Usuarios from '../pages/usuarios/Usuarios.jsx';
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
+
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<Login />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/produtos" element={<Produtos />} />
           <Route path="/movimentacoes" element={<Movimentacoes />} />
           <Route path="/relatorios" element={<Relatorios />} />
