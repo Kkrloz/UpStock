@@ -4,8 +4,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db.uyespkvxewgfxrizykap.supabase.co:5432/postgres?sslmode=require
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host:5432/postgres?sslmode=require
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: bjnqhVg53o1Ic6qy
+      SPRING_DATASOURCE_PASSWORD: CHANGE_ME
       JWT_SECRET: generate-via-openssl-rand-base64-32
       ADMIN_PASSWORD: change-me
