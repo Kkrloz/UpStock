@@ -37,7 +37,7 @@ function BarraLateral({ onClose }) {
       <div className="flex flex-col gap-2 w-full px-4">
         <TextoBar>{t('nav.main')}</TextoBar>
         <div className="flex flex-col gap-1">
-          <MenuButton icon={LayoutGrid} label={t('nav.overview')} to="/" active={currentPath === '/'} onClick={handleNav} />
+          <MenuButton icon={LayoutGrid} label={t('nav.overview')} to="/dashboard" active={currentPath === '/dashboard'} onClick={handleNav} />
           <MenuButton icon={Package} label={t('nav.products')} to="/produtos" active={currentPath === '/produtos'} onClick={handleNav} />
           <MenuButton icon={Truck} label={t('nav.movements')} to="/movimentacoes" active={currentPath === '/movimentacoes'} onClick={handleNav} />
           <MenuButton icon={ChartColumnIncreasing} label={t('nav.reports')} to="/relatorios" active={currentPath === '/relatorios'} onClick={handleNav} />
