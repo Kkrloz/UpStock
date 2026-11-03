@@ -1,0 +1,17 @@
+name: Keep Render alive
+
+on:
+  schedule:
+    # A cada 10 min. O free tier do Render dorme apos ~15 min de inatividade.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 https://upstock-api-l5gb.onrender.com/api/ping)
+          echo "HTTP $code"
+          test "$code" = "200"

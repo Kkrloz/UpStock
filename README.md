@@ -206,7 +206,7 @@ The service is defined in `render.yaml` (Blueprint) and built from the `Dockerfi
 
 The frontend auto-deploys to [Vercel](https://vercel.com) from the `master` branch.
 `vercel.json` rewrites `/api/*` requests to the Render backend at
-`https://upstock-api.onrender.com`. If the Render URL changes, update it there.
+`https://upstock-api-l5gb.onrender.com`. If the Render URL changes, update it there.
 
 ---
 
