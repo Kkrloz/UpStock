@@ -197,7 +197,8 @@ The service is defined in `render.yaml` (Blueprint) and built from the `Dockerfi
 **Free tier notes:**
 
 - The service sleeps after 15 minutes of inactivity and takes ~1 min to cold start.
-  Keep it awake with a free cron (e.g. cron-job.org) hitting `/api/ping` every 10 minutes.
+  `.github/workflows/keepalive.yml` pings `/api/ping` every 10 minutes (outside
+  00:00–06:00 BRT) to stay inside Render's 750 free instance hours/month.
 - 512 MB RAM: `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=70 -XX:+UseSerialGC` is set in `render.yaml`.
 - SSE connections and the login rate limiter live in memory, so a restart drops them
   (browsers reconnect automatically).

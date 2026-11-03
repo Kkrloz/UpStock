@@ -1,3 +1,7 @@
+# Referência de Blueprint. O serviço em produção foi criado via API e roda em
+# https://upstock-api-l5gb.onrender.com (o nome "upstock-api" já estava em uso,
+# por isso o Render adicionou o sufixo). Evite aplicar este Blueprint novamente
+# enquanto o serviço existir, senão o Render tenta criar um duplicado.
 services:
   - type: web
     name: upstock-api

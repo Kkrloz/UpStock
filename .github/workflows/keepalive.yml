@@ -12,6 +12,13 @@ jobs:
     steps:
       - name: Ping backend
         run: |
+          hour=$(date -u +%-H)
+          # Render free = 750 h/mes. Pular 03:00-08:59 UTC (00:00-05:59 BRT)
+          # deixa ~540 h de uso por mes, com folga para redeploys.
+          if [ "$hour" -ge 3 ] && [ "$hour" -lt 9 ]; then
+            echo "Fora da janela de keep-alive (madrugada). Skipping."
+            exit 0
+          fi
           code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 https://upstock-api-l5gb.onrender.com/api/ping)
           echo "HTTP $code"
           test "$code" = "200"
