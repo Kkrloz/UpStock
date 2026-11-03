@@ -10,7 +10,7 @@
     <br>
     <img src="https://img.shields.io/badge/Flyway-CC0000?style=for-the-badge&logo=flyway&logoColor=white" alt="Flyway">
     <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
-    <img src="https://img.shields.io/badge/Railway-0B0D0E?style=for-the-badge&logo=railway&logoColor=white" alt="Railway">
+    <img src="https://img.shields.io/badge/Render-000000?style=for-the-badge&logo=render&logoColor=white" alt="Render">
     <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
   </p>
 </div>
@@ -43,12 +43,12 @@
 │                     Vercel (Frontend)                        │
 │  React 19 + Vite + Tailwind CSS + Axios + React Router       │
 │                                                              │
-│  /api/(.*)  ───── reverse proxy ────►  Railway (Backend)     │
+│  /api/(.*)  ───── reverse proxy ────►  Render (Backend)      │
 └──────────────────────────────────────────────────────────────┘
                          │
                          ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                    Railway (Backend)                          │
+│                    Render (Backend)                           │
 │  Spring Boot 4.0 + Spring Security + Spring Data JPA          │
 │  Flyway + PostgreSQL 16 + Swagger/OpenAPI                     │
 │                                                              │
@@ -112,7 +112,9 @@ cd UpStock
 
 # Configure environment variables
 cp .env.example .env
-# Edit .env with your credentials
+# Edit .env with your credentials.
+# Spring Boot does not read .env files: load the variables into your
+# environment (IDE run configuration) or use Docker: docker compose up -d
 
 # Run migrations and start
 mvn spring-boot:run -DskipTests
@@ -145,14 +147,22 @@ docker compose up -d
 
 ## 🔐 Environment Variables
 
-### Backend (`.env`)
+### Backend (environment variables)
+
+> Spring Boot does **not** read `.env` files. Set these in the hosting provider
+> dashboard, in your IDE run configuration, or via `docker compose`.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `SPRING_DATASOURCE_URL` | ✅ | — | PostgreSQL JDBC URL |
+| `SPRING_DATASOURCE_URL` | ✅ | — | PostgreSQL JDBC URL (`jdbc:postgresql://...`) |
+| `SPRING_DATASOURCE_USERNAME` | ✅ | — | Database user |
+| `SPRING_DATASOURCE_PASSWORD` | ✅ | — | Database password |
 | `JWT_SECRET` | ✅ | — | JWT secret key (min 32 chars) |
 | `JWT_EXPIRATION` | ❌ | `86400000` | Access token duration (ms) |
-| `ADMIN_PASSWORD` | ✅ | — | Initial admin password |
+| `ADMIN_PASSWORD` | ✅ | — | Admin password (reapplied on every boot) |
+| `PORT` | ❌ | `8080` | HTTP port (injected by Render) |
+| `DB_POOL_SIZE` | ❌ | `5` | HikariCP max pool size |
+| `CORS_ALLOWED_ORIGINS` | ❌ | Vercel + localhost | Comma-separated allowed origins |
 | `SHOW_SQL` | ❌ | `false` | Log SQL queries |
 
 ### Frontend
@@ -165,26 +175,38 @@ docker compose up -d
 
 ## 🌐 Deployment
 
-### Backend — Railway
+### Backend — Render
 
-The backend auto-deploys to [Railway](https://railway.app) from the `master` branch. `railway.json` defines:
+The backend auto-deploys to [Render](https://render.com) from the `master` branch.
+The service is defined in `render.yaml` (Blueprint) and built from the `Dockerfile`
+(multi-stage: Maven build → JRE 21 alpine runtime).
 
-```json
-{
-  "build": { "buildCommand": "mvn clean package -DskipTests" },
-  "deploy": { "startCommand": "java -jar target/upstock-0.0.1-SNAPSHOT.jar" }
-}
-```
+**Render setup:**
 
-**Required Railway variables:**
+1. New → Blueprint (or Web Service) → connect this repository
+2. Runtime: **Docker**, region: **Virginia** (`us-east-1`, same as Neon)
+3. Health check path: `/api/ping`
+4. Fill the environment variables listed in `render.yaml` (`sync: false` entries)
 
-- `SPRING_DATASOURCE_URL` — PostgreSQL database URL (Neon)
-- `JWT_SECRET` — JWT secret key
+**Required Render variables:**
+
+- `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD` — Neon (use the **direct** host, without `-pooler`, so Flyway's advisory locks work)
+- `JWT_SECRET` — JWT secret key (min 32 chars)
 - `ADMIN_PASSWORD` — Admin password
+
+**Free tier notes:**
+
+- The service sleeps after 15 minutes of inactivity and takes ~1 min to cold start.
+  Keep it awake with a free cron (e.g. cron-job.org) hitting `/api/ping` every 10 minutes.
+- 512 MB RAM: `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=70 -XX:+UseSerialGC` is set in `render.yaml`.
+- SSE connections and the login rate limiter live in memory, so a restart drops them
+  (browsers reconnect automatically).
 
 ### Frontend — Vercel
 
-The frontend auto-deploys to [Vercel](https://vercel.com) from the `master` branch. `vercel.json` proxies `/api/*` requests to Railway.
+The frontend auto-deploys to [Vercel](https://vercel.com) from the `master` branch.
+`vercel.json` rewrites `/api/*` requests to the Render backend at
+`https://upstock-api.onrender.com`. If the Render URL changes, update it there.
 
 ---
 
