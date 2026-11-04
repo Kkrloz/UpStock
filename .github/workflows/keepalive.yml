@@ -9,7 +9,9 @@ name: Keep Render alive
 
 on:
   schedule:
+    # Duas entradas por janela: se o GitHub descartar uma, a outra inicia o ciclo.
     - cron: "0 */4 * * *"
+    - cron: "20 */4 * * *"
   # Cada push tambem inicia um ciclo (util apos deploys).
   push:
     branches: [master]
