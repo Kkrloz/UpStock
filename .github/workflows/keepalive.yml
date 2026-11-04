@@ -1,26 +1,59 @@
 name: Keep Render alive
 
+# O agendador do GitHub e best-effort: na pratica ele entrega poucas execucoes por
+# dia (ja vimos 2 execucoes em 11 h com cron de 10 min). Por isso cada execucao
+# fica viva por ~6 h pingando a cada 5 min -- assim 6 disparos por dia cobrem o
+# dia inteiro, e um disparo perdido ainda e absorvido pelo job anterior.
+#
+# O free tier do Render hiberna apos ~15 min sem trafego.
+
 on:
   schedule:
-    # A cada 5 min (o GitHub atrasa/descarta agendamentos com frequencia).
-    # O free tier do Render dorme apos ~15 min de inatividade.
-    - cron: "*/5 * * * *"
+    - cron: "0 */4 * * *"
   workflow_dispatch:
 
+permissions: {}
+
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
 jobs:
-  ping:
+  keepalive:
     runs-on: ubuntu-latest
+    timeout-minutes: 355 # ~5h55, abaixo do limite de 6 h do GitHub
+    env:
+      TARGET: https://upstock-api-l5gb.onrender.com/api/ping
     steps:
-      - name: Ping backend
+      - name: Ping loop
         run: |
-          hour=$(date -u +%-H)
-          # Render free = 750 h/mes. Pular 03:00-08:59 UTC (00:00-05:59 BRT)
-          # deixa ~540 h de uso por mes, com folga para redeploys.
-          if [ "$hour" -ge 3 ] && [ "$hour" -lt 9 ]; then
-            echo "Fora da janela de keep-alive (madrugada). Skipping."
-            exit 0
-          fi
-          # --max-time 120 cobre o cold start (~90s) de um ping que acorde o servico.
-          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 https://upstock-api-l5gb.onrender.com/api/ping)
-          echo "HTTP $code"
-          test "$code" = "200"
+          set -u
+          interval=300                                   # 5 min entre pings
+          deadline=$(( $(date +%s) + 345 * 60 ))         # 5h45 de loop
+
+          echo "Inicio: $(date -u +%FT%TZ) | alvo: $TARGET"
+
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            hour=$(date -u +%-H)
+
+            # Render free = 750 h/mes. Dormir 02:00-03:59 UTC (23:00-00:59 BRT)
+            # deixa ~22 h/dia = ~680 h/mes, com folga para redeploys.
+            if [ "$hour" -ge 2 ] && [ "$hour" -lt 4 ]; then
+              echo "[$(date -u +%H:%M)] janela de descanso (02-04 UTC) - dormindo 1h"
+              sleep 3600
+              continue
+            fi
+
+            # --max-time 120 cobre o cold start (~90 s) de um ping que acorda o servico.
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 "$TARGET" || true)
+            code=${code:-000}
+            echo "[$(date -u +%H:%M:%S)] HTTP $code"
+
+            if [ "$code" != "200" ]; then
+              echo "::warning::ping retornou HTTP $code"
+            fi
+
+            sleep "$interval"
+          done
+
+          echo "Fim do ciclo ($(date -u +%FT%TZ)). O proximo disparo assume a partir daqui."

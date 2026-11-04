@@ -197,10 +197,10 @@ The service is defined in `render.yaml` (Blueprint) and built from the `Dockerfi
 **Free tier notes:**
 
 - The service sleeps after 15 minutes of inactivity and takes ~1 min to cold start.
-  `.github/workflows/keepalive.yml` pings `/api/ping` every 5 minutes (outside
-  00:00–06:00 BRT) to stay inside Render's 750 free instance hours/month. GitHub's
-  scheduler is best-effort and can skip runs, so an external free pinger
-  (e.g. cron-job.org, every 10 min) is recommended for real reliability.
+  `.github/workflows/keepalive.yml` keeps it awake with a ~6 h ping loop
+  (every 5 min), restarted by a cron every 4 h — GitHub's scheduler is
+  best-effort, so short/frequent crons get dropped. It skips 02:00–03:59 UTC
+  (23:00–00:59 BRT) to stay around 680 of Render's 750 free instance hours/month.
 - The frontend tolerates cold starts: API timeout is 120 s and the login page pings
   `/api/ping` on mount, showing a "waking up the server" hint after 5 s.
 - 512 MB RAM: `JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=70 -XX:+UseSerialGC` is set in `render.yaml`.
