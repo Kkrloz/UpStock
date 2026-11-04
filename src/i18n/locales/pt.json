@@ -104,6 +104,7 @@
     "submit": "Entrar",
     "errorRequired": "Preencha e-mail e senha para continuar.",
     "errorInvalid": "Credenciais inválidas. Tente novamente.",
+    "wakingUp": "Acordando o servidor (hospedagem gratuita). Isso pode levar até 1 minuto na primeira vez — aguarde, não feche a página.",
     "footerText": "UpStock — Gerencie seu Estoque"
   },
   "dashboard": {

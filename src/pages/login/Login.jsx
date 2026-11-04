@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
 import { Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 function Login() {
@@ -14,6 +15,19 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [slow, setSlow] = useState(false);
+
+  // O free tier do Render hiberna: aproveita a tela de login para acordar a API
+  // antes de o usuário enviar as credenciais.
+  useEffect(() => {
+    api.get('/ping').catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading) return undefined;
+    const timer = setTimeout(() => setSlow(true), 5000);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,6 +36,7 @@ function Login() {
       return;
     }
     setError('');
+    setSlow(false);
     setIsLoading(true);
     try {
       await login(email, password);
@@ -29,6 +44,7 @@ function Login() {
     } catch (err) {
       setError(err.message || t('login.errorInvalid'));
     } finally {
+      setSlow(false);
       setIsLoading(false);
     }
   };
@@ -72,6 +88,10 @@ function Login() {
           <button id="login-submit-btn" type="submit" disabled={isLoading} className="login-submit-btn">
             {isLoading ? <div className="login-spinner" /> : t('login.submit')}
           </button>
+
+          {slow && (
+            <p className="login-hint">{t('login.wakingUp')}</p>
+          )}
         </form>
 
         <div className="login-register-link">

@@ -2,8 +2,9 @@ name: Keep Render alive
 
 on:
   schedule:
-    # A cada 10 min. O free tier do Render dorme apos ~15 min de inatividade.
-    - cron: "*/10 * * * *"
+    # A cada 5 min (o GitHub atrasa/descarta agendamentos com frequencia).
+    # O free tier do Render dorme apos ~15 min de inatividade.
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -19,6 +20,7 @@ jobs:
             echo "Fora da janela de keep-alive (madrugada). Skipping."
             exit 0
           fi
-          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 https://upstock-api-l5gb.onrender.com/api/ping)
+          # --max-time 120 cobre o cold start (~90s) de um ping que acorde o servico.
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 https://upstock-api-l5gb.onrender.com/api/ping)
           echo "HTTP $code"
           test "$code" = "200"

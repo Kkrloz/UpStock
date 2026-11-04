@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { authService } from '../services/authService';
 
 const AuthContext = createContext(null);
@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
         console.warn('Auth session loading timed out');
         setLoading(false);
       }
-    }, 10000);
+    }, 120000);
 
     async function loadSession() {
       try {
@@ -31,13 +31,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    setLoading(true);
-    try {
-      const loggedUser = await authService.login(email, password);
-      setUser(loggedUser);
-      return loggedUser;
-    } catch (error) { setLoading(false); throw error; }
-    finally { setLoading(false); }
+    // Nao mexe no `loading` global: os guards de rota usam esse estado apenas
+    // para restaurar a sessao. Mantendo-o intacto, a tela de login continua
+    // visivel (com spinner e aviso de cold start) enquanto a API acorda.
+    const loggedUser = await authService.login(email, password);
+    setUser(loggedUser);
+    return loggedUser;
   };
 
   const logout = async () => {

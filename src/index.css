@@ -1713,6 +1713,14 @@
   pointer-events: none;
 }
 
+/* Aviso de cold start (Render free) */
+.login-hint {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--text-secondary-color);
+}
+
 /* Spinner do botão de login */
 .login-spinner {
   width: 16px;
