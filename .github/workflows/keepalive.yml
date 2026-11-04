@@ -10,6 +10,9 @@ name: Keep Render alive
 on:
   schedule:
     - cron: "0 */4 * * *"
+  # Cada push tambem inicia um ciclo (util apos deploys).
+  push:
+    branches: [master]
   workflow_dispatch:
 
 permissions: {}
